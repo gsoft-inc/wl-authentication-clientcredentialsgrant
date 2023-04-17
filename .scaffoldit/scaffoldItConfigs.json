@@ -1,0 +1,64 @@
+{
+  "scaffoldItConfigs": [
+    {
+      "type": "Api",
+      "parameters": {
+        "hostname": "",
+        "agent-pool": "",
+        "k8s-namespace": "",
+        "stg-arm-service-connection": "",
+        "stg-resource-group": "",
+        "stg-k8s-cluster": "",
+        "stg-container-registry": "",
+        "prod-arm-service-connection": "",
+        "prod-resource-group": "",
+        "prod-k8s-cluster": "",
+        "prod-container-registry": ""
+      }
+    },
+    {
+      "type": "InfrastructureAsCode",
+      "parameters": {
+        "include-terraform-config": "true",
+        "product-name": "",
+        "project-name": "",
+        "ado-org": "",
+        "ado-project": "",
+        "ado-repo": "",
+        "ado-agent-pool": "",
+        "terraform-resource-owner-email": "",
+        "terraform-production-resource-location": "",
+        "keyvault-sku": "",
+        "keyvault-soft-delete-retention": "",
+        "dev-keyvault-ip-rules": "",
+        "stg-keyvault-ip-rules": "",
+        "prod-keyvault-ip-rules": "",
+        "dev-keyvault-subnet-rules": "",
+        "stg-keyvault-subnet-rules": "",
+        "prod-keyvault-subnet-rules": "",
+        "appconfig-sku": "",
+        "appconfig-soft-delete-retention": ""
+      }
+    },
+    {
+      "type": "AdoLibrary",
+      "parameters": {
+        "source-control": "ado",
+        "ado-org": "true",
+        "ado-project": "",
+        "ado-repo": "",
+        "ado-feed": "",
+        "ado-agent-pool": "",
+        "signed": "true"
+      }
+    },
+    {
+      "type": "GitHubLibrary",
+      "parameters": {
+        "source-control": "github",
+        "github-repo": "gsoft-authentication-client-credentials-grant",
+        "signed": "true"
+      }
+    }
+  ]
+}
