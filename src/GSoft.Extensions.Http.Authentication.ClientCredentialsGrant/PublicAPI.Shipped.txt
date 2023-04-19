@@ -1,1 +1,14 @@
 #nullable enable
+const GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.BaseSectionName = "ClientCredentialsHttpClients" -> string!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.get -> string!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.set -> void
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientCredentialsOptions() -> void
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientId.get -> string!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientId.set -> void
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientSecret.get -> string!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientSecret.set -> void
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scopes.get -> string![]!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scopes.set -> void
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.HttpClientBuilderExtentions
+static GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.HttpClientBuilderExtentions.AddClientCredentials(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
