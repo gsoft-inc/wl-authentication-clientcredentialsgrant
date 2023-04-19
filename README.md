@@ -7,7 +7,9 @@ This library offers an IHttpClientBuilder extension method for streamlined acces
 
 ## Getting started
 
-Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project where you want to register an HttpClient. This package contains the extension method that adds the access token management to an HttpClient.
+Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project where you want to register an HttpClient.
+This package contains the extension method that adds the access token management to an HttpClient.
+By default the library will bind options based on the name used to register the HttpClient, this allows having more than one client credentials configuration.
 
 ## Example
 ```csharp
@@ -38,8 +40,8 @@ Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project
 }
 
 // HttpClient registration
-serivces.AddHttpClient("Service1").AddClientCredentials();
-serivces.AddHttpClient("Service2").AddClientCredentials(options => {
+serivces.AddHttpClient("Service1").AddClientCredentialsHandler();
+serivces.AddHttpClient("Service2").AddClientCredentialsHandler(options => {
     options.ClientId = "0cbc8ffa-cd51-48a1-8e21-cad7d008fc74" 
 });
 
