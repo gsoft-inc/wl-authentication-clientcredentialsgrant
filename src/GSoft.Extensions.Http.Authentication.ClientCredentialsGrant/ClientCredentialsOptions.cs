@@ -5,6 +5,8 @@
 /// </summary>
 public sealed class ClientCredentialsOptions
 {
+    private static readonly char[] SpaceCharacterArray = { ' ' };
+
     public const string BaseSectionName = "ClientCredentialsHttpClients";
 
     /// <summary>
@@ -26,4 +28,15 @@ public sealed class ClientCredentialsOptions
     /// Represents the permissions or access levels requested by the client application from the Authority.
     /// </summary>
     public string[] Scopes { get; set; } = Array.Empty<string>();
+
+    public string Scope
+    {
+        get => string.Join(" ", this.Scopes);
+        set => this.Scopes = value.Split(SpaceCharacterArray, StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    /// <summary>
+    /// A time buffer during which an access token is deemed expired prior to its actual expiration time.
+    /// </summary>
+    public TimeSpan CacheLifetimeBuffer { get; set; } = TimeSpan.FromSeconds(60);
 }
