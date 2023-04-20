@@ -3,7 +3,7 @@
     <Copyright>Copyright © GSoft Group Inc. $([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <Authors>GSoft Group Inc.</Authors>
     <Owners>GSoft Group Inc.</Owners>
-    <PackageProjectUrl>https://github.com/gsoft-inc/gsoft-authentication-client-credentials-grant</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>10</LangVersion>
