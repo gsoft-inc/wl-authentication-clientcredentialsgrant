@@ -1,5 +1,4 @@
 #nullable enable
-const GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.BaseSectionName = "ClientCredentialsHttpClients" -> string!
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.get -> string!
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.set -> void
