@@ -1,6 +1,6 @@
 # GSoft.Authentication.ClientCredentialsGrant
 
-[![nuget](https://img.shields.io/nuget/v/GSoft.Authentication.Client.Credentials.Grant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Authentication.Client.Credentials.Grant/)
+[![nuget](https://img.shields.io/nuget/v/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/)
 [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-client-credentials-grant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-client-credentials-grant/actions/workflows/publish.yml)
 
 This library offers an IHttpClientBuilder extension method for streamlined access token retrieval and caching using the OAuth 2.0 Client Credentials Grant flow.
