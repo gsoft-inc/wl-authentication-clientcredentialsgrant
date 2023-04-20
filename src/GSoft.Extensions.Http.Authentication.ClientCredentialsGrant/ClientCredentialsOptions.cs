@@ -7,8 +7,6 @@ public sealed class ClientCredentialsOptions
 {
     private static readonly char[] SpaceCharacterArray = { ' ' };
 
-    public const string BaseSectionName = "ClientCredentialsHttpClients";
-
     /// <summary>
     /// Base URL of the OAuth 2.0 server responsible for issuing access tokens.
     /// </summary>
@@ -29,6 +27,9 @@ public sealed class ClientCredentialsOptions
     /// </summary>
     public string[] Scopes { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// Represents the permissions or access levels requested by the client application from the Authority.
+    /// </summary>
     public string Scope
     {
         get => string.Join(" ", this.Scopes);

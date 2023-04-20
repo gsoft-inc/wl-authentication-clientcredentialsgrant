@@ -1,7 +1,7 @@
 # GSoft.Authentication.ClientCredentialsGrant
 
-[![nuget](https://img.shields.io/nuget/v/GSoft.Authentication.Client.Credentials.Grant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Authentication.Client.Credentials.Grant/)
-[![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-client-credentials-grant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-client-credentials-grant/actions/workflows/publish.yml)
+[![nuget](https://img.shields.io/nuget/v/GSoft.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Authentication.ClientCredentialsGrant/)
+[![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml)
 
 This library offers an IHttpClientBuilder extension method for streamlined access token retrieval and caching using the OAuth 2.0 Client Credentials Grant flow.
 
@@ -9,35 +9,38 @@ This library offers an IHttpClientBuilder extension method for streamlined acces
 
 Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project where you want to register an HttpClient.
 This package contains the extension method that adds the access token management to an HttpClient.
-By default the library will bind options based on the name used to register the HttpClient, this allows having more than one client credentials configuration.
 
 ## Example
-```csharp
+```json
 // appsettings.json
 {
-  "ClientCredentialsHttpClients": {
-    "Service1": {
-      "Authority": "<authority_url>",
-      "ClientId": "<client_id>",
-      "ClientSecret": "<client_secret>",
-      "Scopes": [
-        "scope1",
-        "scope2"
-      ]
-    },
-    "Service2": {
-      "Authority": "<authority_url>",
-      "ClientId": "<client_id>",
-      "ClientSecret": "<client_secret>",
-      "Scopes": [
-        "scope"
-      ]
-    },
-    "OtherService": {
-      // ...
-    }
+  "Service1": {
+    "Authority": "<authority_url>",
+    "ClientId": "<client_id>",
+    "ClientSecret": "<client_secret>",
+    "Scopes": [
+      "scope1",
+      "scope2"
+    ]
+  },
+  "Service2": {
+    "Authority": "<authority_url>",
+    "ClientId": "<client_id>",
+    "ClientSecret": "<client_secret>",
+    "Scope": "scopeA scopeB"
+  },
+  "OtherService": {
+    // ...
   }
 }
+```
+
+```csharp
+// Options configuration
+services.AddOptions<ClientCredentialsOptions>(builder.Name)
+    .BindConfiguration($"Service1");
+services.AddOptions<ClientCredentialsOptions>(builder.Name)
+    .BindConfiguration($"Service2");
 
 // HttpClient registration
 serivces.AddHttpClient("Service1").AddClientCredentialsHandler();
@@ -60,7 +63,6 @@ internal sealed class MyCommandHandler
         await this._httpClient.GetStringAsync("https://targetservice.com");
     }
 }
-
 ```
 
 ## Building, releasing and versioning
