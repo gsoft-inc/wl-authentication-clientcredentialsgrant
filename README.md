@@ -9,38 +9,35 @@ This library offers an IHttpClientBuilder extension method for streamlined acces
 
 Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project where you want to register an HttpClient.
 This package contains the extension method that adds the access token management to an HttpClient.
+By default the library will bind options based on the name used to register the HttpClient, this allows having more than one client credentials configuration.
 
 ## Example
-```json
+```csharp
 // appsettings.json
 {
-  "Service1": {
-    "Authority": "<authority_url>",
-    "ClientId": "<client_id>",
-    "ClientSecret": "<client_secret>",
-    "Scopes": [
-      "scope1",
-      "scope2"
-    ]
-  },
-  "Service2": {
-    "Authority": "<authority_url>",
-    "ClientId": "<client_id>",
-    "ClientSecret": "<client_secret>",
-    "Scope": "scopeA scopeB"
-  },
-  "OtherService": {
-    // ...
+  "ClientCredentialsHttpClients": {
+    "Service1": {
+      "Authority": "<authority_url>",
+      "ClientId": "<client_id>",
+      "ClientSecret": "<client_secret>",
+      "Scopes": [
+        "scope1",
+        "scope2"
+      ]
+    },
+    "Service2": {
+      "Authority": "<authority_url>",
+      "ClientId": "<client_id>",
+      "ClientSecret": "<client_secret>",
+      "Scopes": [
+        "scope"
+      ]
+    },
+    "OtherService": {
+      // ...
+    }
   }
 }
-```
-
-```csharp
-// Options configuration
-services.AddOptions<ClientCredentialsOptions>(builder.Name)
-    .BindConfiguration($"Service1");
-services.AddOptions<ClientCredentialsOptions>(builder.Name)
-    .BindConfiguration($"Service2");
 
 // HttpClient registration
 serivces.AddHttpClient("Service1").AddClientCredentialsHandler();
@@ -63,6 +60,7 @@ internal sealed class MyCommandHandler
         await this._httpClient.GetStringAsync("https://targetservice.com");
     }
 }
+
 ```
 
 ## Building, releasing and versioning
