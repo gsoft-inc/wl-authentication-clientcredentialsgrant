@@ -2,11 +2,13 @@
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Secret = Duende.IdentityServer.Models.Secret;
 
 namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
 
@@ -55,7 +57,7 @@ public class IntegrationTests
         // Here begins services registrations in the dependency injection container
         webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
         webAppBuilder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
-        webAppBuilder.Services.AddDataProtection();
+        webAppBuilder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
         webAppBuilder.Services.AddIdentityServer()
             .AddInMemoryClients(identityOAuthClients)
