@@ -1,6 +1,6 @@
 ﻿namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 
-internal static class Constants
+public static class ClientCredentialsConstants
 {
     public const string BackchannelHttpClientName = "GSoft.Authentication.ClientCredentialsGrant";
 }

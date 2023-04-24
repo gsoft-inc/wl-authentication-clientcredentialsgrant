@@ -35,7 +35,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
             ClientCredentialStyle = ClientCredentialStyle.AuthorizationHeader,
         };
 
-        var httpClient = this._httpClientFactory.CreateClient(Constants.BackchannelHttpClientName);
+        var httpClient = this._httpClientFactory.CreateClient(ClientCredentialsConstants.BackchannelHttpClientName);
 
         // Eventually replace IdentityModel with Microsoft.Identity.Client (MSAL) when their generic authority feature is mature
         var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);

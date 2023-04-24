@@ -56,7 +56,7 @@ public static class HttpClientBuilderExtensions
     private sealed class AddBackchannelRetryHandlerConfigureOptions : ConfigureNamedOptions<HttpClientFactoryOptions>
     {
         public AddBackchannelRetryHandlerConfigureOptions()
-            : base(Constants.BackchannelHttpClientName, AddBackchannelRetryHandler)
+            : base(ClientCredentialsConstants.BackchannelHttpClientName, AddBackchannelRetryHandler)
         {
         }
 

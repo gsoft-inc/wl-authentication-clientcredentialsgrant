@@ -37,7 +37,7 @@ internal sealed class OpenIdConfigurationRetrieverWithCache : IOpenIdConfigurati
                 return configuration;
             }
 
-            var httpClient = this._httpClientFactory.CreateClient(Constants.BackchannelHttpClientName);
+            var httpClient = this._httpClientFactory.CreateClient(ClientCredentialsConstants.BackchannelHttpClientName);
             var oidcMetadataEndpoint = authority.TrimEnd('/') + "/.well-known/openid-configuration";
 
             using var responseStream = await httpClient.GetStreamAsync(oidcMetadataEndpoint).ConfigureAwait(false);

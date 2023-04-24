@@ -79,7 +79,7 @@ public class IntegrationTests
         });
 
         // Change the primary HTTP message handler of this library to communicate with this in-memory test server without accessing the network
-        webAppBuilder.Services.AddHttpClient(Constants.BackchannelHttpClientName)
+        webAppBuilder.Services.AddHttpClient(ClientCredentialsConstants.BackchannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(x => x.GetRequiredService<TestServer>().CreateHandler());
 
         // Configure the authenticated HttpClient used to communicate with the protected invoices endpoint

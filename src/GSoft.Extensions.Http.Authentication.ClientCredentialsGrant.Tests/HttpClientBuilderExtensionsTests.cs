@@ -20,13 +20,13 @@ public class HttpClientBuilderExtensionsTests
 
         // Keep a reference on the http message handlers that will be created when instanciating the http clients
         var myTestApiHttpMessageHandlerInspector = EnableInternalHttpMessageHandlerInspection(services, "MyTestApi");
-        var backchannelHttpMessageHandlerInspector = EnableInternalHttpMessageHandlerInspection(services, Constants.BackchannelHttpClientName);
+        var backchannelHttpMessageHandlerInspector = EnableInternalHttpMessageHandlerInspection(services, ClientCredentialsConstants.BackchannelHttpClientName);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
         // Instanciating http clients also instanciate the underlying http message handlers
         _ = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("MyTestApi");
-        _ = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(Constants.BackchannelHttpClientName);
+        _ = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(ClientCredentialsConstants.BackchannelHttpClientName);
 
         // The inspected handlers should be in this order: ClientCredentialsTokenHttpMessageHandler, LoggingHttpMessageHandler then HttpClientHandler
         var myTestApiHttpMessageHandlers = myTestApiHttpMessageHandlerInspector.HttpMessageHandlers.ToArray();

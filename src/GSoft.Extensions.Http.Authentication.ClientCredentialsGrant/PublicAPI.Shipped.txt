@@ -1,4 +1,6 @@
 #nullable enable
+const GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsConstants.BackchannelHttpClientName = "GSoft.Authentication.ClientCredentialsGrant" -> string!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsConstants
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.get -> string!
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.set -> void
