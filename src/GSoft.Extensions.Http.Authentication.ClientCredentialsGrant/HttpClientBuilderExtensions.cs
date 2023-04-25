@@ -30,7 +30,7 @@ public static class HttpClientBuilderExtensions
         builder.Services.TryAddSingleton<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         builder.Services.TryAddSingleton<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         builder.Services.TryAddSingleton<IOpenIdConfigurationRetriever, OpenIdConfigurationRetrieverWithCache>();
-        builder.Services.TryAddSingleton<IClientCredentialsTokenSerializer, ClientCredentialsTokenProtectedSerializer>();
+        builder.Services.TryAddSingleton<IClientCredentialsTokenSerializer, ClientCredentialsTokenSerializer>();
 
         // Using concrete IConfigureOptions<> classes ensure we only add the http message handlers once. The reasons are:
         // - We don't want to authenticate consumer HTTP requests twice or even more

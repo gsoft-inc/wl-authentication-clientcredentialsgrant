@@ -6,18 +6,13 @@ namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 /// <summary>
 /// Class responsible for serializing and deserializing <see cref="ClientCredentialsToken"/> to/from bytes.
 /// </summary>
-internal sealed class ClientCredentialsTokenProtectedSerializer : IClientCredentialsTokenSerializer
+internal sealed class ClientCredentialsTokenSerializer : IClientCredentialsTokenSerializer
 {
-    // This purpose string must not change.
-    // Changing this data protection purpose string will break the read of existing serialized/protected tokens:
-    // https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/purpose-strings
-    private const string DefaultPurpose = "gsoft_authentication_clientcredentialsgrant";
-
     private readonly IDataProtector _dataProtector;
 
-    public ClientCredentialsTokenProtectedSerializer(IDataProtectionProvider dataProtectionProvider)
+    public ClientCredentialsTokenSerializer(IDataProtectionProvider dataProtectionProvider)
     {
-        this._dataProtector = dataProtectionProvider.CreateProtector(DefaultPurpose);
+        this._dataProtector = dataProtectionProvider.CreateProtector(ClientCredentialsConstants.DataProtectionPurpose);
     }
 
     public byte[] Serialize(string clientName, ClientCredentialsToken token)
