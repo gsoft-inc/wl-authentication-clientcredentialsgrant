@@ -31,10 +31,20 @@ internal sealed class ClientCredentialsTokenHttpMessageHandler : PolicyHttpMessa
 
     protected override async Task<HttpResponseMessage> SendCoreAsync(HttpRequestMessage request, Context context, CancellationToken cancellationToken)
     {
+        EnsureRequestIsSentOverHttps(request);
+
         // Retry with a new token if the previous attempt was unauthorized
         var cachingBehavior = context.ContainsKey(RetryCountContextKey) ? CachingBehavior.ForceRefresh : CachingBehavior.PreferCache;
         await this.SetTokenAsync(request, cachingBehavior, cancellationToken).ConfigureAwait(false);
         return await base.SendCoreAsync(request, context, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static void EnsureRequestIsSentOverHttps(HttpRequestMessage request)
+    {
+        if (request.RequestUri is { IsAbsoluteUri: true } requestUri && requestUri.Scheme != "https")
+        {
+            throw new ClientCredentialsException("Due to security concerns, authenticated requests must be sent over HTTPS");
+        }
     }
 
     private async Task SetTokenAsync(HttpRequestMessage request, CachingBehavior cachingBehavior, CancellationToken cancellationToken)

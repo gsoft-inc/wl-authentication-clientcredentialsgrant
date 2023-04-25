@@ -126,6 +126,10 @@ public class IntegrationTests
             // Paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
             var forbiddenException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices", cts.Token));
             Assert.Equal(HttpStatusCode.Forbidden, forbiddenException.StatusCode);
+
+            // We require JWT-authenticated requests to be sent over HTTPS
+            var unsecuredException = await Assert.ThrowsAsync<ClientCredentialsException>(() => invoicesReadHttpClient.GetStringAsync("http://invoice-app.local/public", cts.Token));
+            Assert.Equal("Due to security concerns, authenticated requests must be sent over HTTPS", unsecuredException.Message);
         }
         finally
         {
