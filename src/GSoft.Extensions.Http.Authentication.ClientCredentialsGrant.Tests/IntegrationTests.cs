@@ -55,7 +55,7 @@ public class IntegrationTests
         webAppBuilder.WebHost.UseTestServer(x => x.BaseAddress = new Uri("https://identity.local", UriKind.Absolute));
 
         // Here begins services registrations in the dependency injection container
-        webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
+        webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).ClearProviders().AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
         webAppBuilder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
         webAppBuilder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
