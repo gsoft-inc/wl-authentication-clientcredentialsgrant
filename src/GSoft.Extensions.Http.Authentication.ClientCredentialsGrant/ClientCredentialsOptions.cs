@@ -1,4 +1,10 @@
-﻿namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
+﻿// This file is based on https://github.com/DuendeSoftware/Duende.AccessTokenManagement/blob/1.1.0/src/Duende.AccessTokenManagement/ClientCredentialsClient.cs
+// Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0. All rights reserved.
+//
+// The original file has been significantly modified, and these modifications are Copyright (c) GSoft Group Inc., 2023.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 
 /// <summary>
 /// Represents the configuration options for OAuth 2.0 Client Credentials Grant flow.
@@ -32,7 +38,7 @@ public sealed class ClientCredentialsOptions
     /// </summary>
     public string Scope
     {
-        get => string.Join(" ", this.Scopes);
+        get => this.Scopes == null ? string.Empty : string.Join(" ", this.Scopes);
         set => this.Scopes = value.Split(SpaceCharacterArray, StringSplitOptions.RemoveEmptyEntries);
     }
 
@@ -40,4 +46,9 @@ public sealed class ClientCredentialsOptions
     /// A time buffer during which an access token is deemed expired prior to its actual expiration time.
     /// </summary>
     public TimeSpan CacheLifetimeBuffer { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// Internal cache key computed by options post-configuration
+    /// </summary>
+    internal string CacheKey { get; set; } = string.Empty;
 }
