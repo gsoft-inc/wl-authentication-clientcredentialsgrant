@@ -1,12 +1,26 @@
 # GSoft.Authentication.ClientCredentialsGrant
 
-| Description         | Download link                                                                                                                                                                                                      | Build status                                                                                                                                                                                                                                                        |
-|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Client-side library | [![nuget](https://img.shields.io/nuget/v/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
-| Server-side library | [![nuget](https://img.shields.io/nuget/v/GSoft.AspNetCore.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/)           | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
+| Description                                           | Download link                                                                                                                                                                                                      | Build status                                                                                                                                                                                                                                                        |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Client-side library for any .NET application          | [![nuget](https://img.shields.io/nuget/v/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
+| Server-side library for ASP.NET Core web applications | [![nuget](https://img.shields.io/nuget/v/GSoft.AspNetCore.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/)           | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
 
 This set of two libraries enables **authenticated machine-to-machine HTTP communication** between a .NET application and an ASP.NET Core web application.
 HTTP requests are authenticated with JSON web tokens (JWT) **issued by an OAuth 2.0 authorization server** using [the client credentials grant flow](https://www.rfc-editor.org/rfc/rfc6749#section-4.4).
+
+```
+                      ┌───────────────────────────────┐
+           ┌─────────►│ OAuth2.0 authorization server │◄───────────┐
+           │          └───────────────────────────────┘            │
+           │                                                       │
+           │ get token with                       get signing keys │
+           │ client credentials grant flow                         │ validate
+           │                                                       │    token
+         ┌─┴───────────┐                           ┌───────────────┴────────┐
+         │ Client .NET ├──────────────────────────►│ Protected ASP.NET Core │
+         │ application │  authenticated HTTP call  │         service        │
+         └─────────────┘                           └────────────────────────┘
+```
 
 The **client-side library** includes:
 
