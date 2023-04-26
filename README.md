@@ -94,6 +94,8 @@ public class MyClient
 }
 ```
 
+_This client-side library is based on [Duende.AccessTokenManagement](https://github.com/DuendeSoftware/Duende.AccessTokenManagement/tree/1.1.0), Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0._
+
 
 ### Server side library
 
