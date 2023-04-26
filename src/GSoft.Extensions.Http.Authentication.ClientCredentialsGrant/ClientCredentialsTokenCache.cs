@@ -1,4 +1,10 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+﻿// This file is based on https://github.com/DuendeSoftware/Duende.AccessTokenManagement/blob/1.1.0/src/Duende.AccessTokenManagement/DistributedClientCredentialsTokenCache.cs
+// Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0. All rights reserved.
+//
+// The original file has been significantly modified, and these modifications are Copyright (c) GSoft Group Inc., 2023.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 

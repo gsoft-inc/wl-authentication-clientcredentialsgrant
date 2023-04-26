@@ -1,4 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿// This file is based on https://github.com/DuendeSoftware/Duende.AccessTokenManagement/blob/1.1.0/src/Duende.AccessTokenManagement/ClientCredentialsTokenManagementService.cs
+// Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0. All rights reserved.
+//
+// The original file has been significantly modified, and these modifications are Copyright (c) GSoft Group Inc., 2023.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+using System.Collections.Concurrent;
 
 namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 
