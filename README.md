@@ -1,67 +1,90 @@
 # GSoft.Authentication.ClientCredentialsGrant
 
-[![nuget](https://img.shields.io/nuget/v/GSoft.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Authentication.ClientCredentialsGrant/)
-[![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml)
+| Description         | Download link                                                                                                                                                                                                      | Build status                                                                                                                                                                                                                                                        |
+|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Client-side library | [![nuget](https://img.shields.io/nuget/v/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
+| Server-side library | [![nuget](https://img.shields.io/nuget/v/GSoft.AspNetCore.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/)           | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
 
-This library offers an IHttpClientBuilder extension method for streamlined access token retrieval and caching using the OAuth 2.0 Client Credentials Grant flow.
+This set of two libraries enables **authenticated machine-to-machine HTTP communication** between a .NET application and an ASP.NET Core web application.
+HTTP requests are authenticated with JSON web tokens (JWT) **issued by an OAuth 2.0 authorization server** using [the client credentials grant flow](https://www.rfc-editor.org/rfc/rfc6749#section-4.4).
+
+The **client-side library** includes:
+
+* Automatic acquisition and lifetime management of client credentials-based access tokens.
+* Optimized access token caching with two layers of cache using [IMemoryCache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/memory), [IDistributedCache](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/distributed), and [data protection](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/introduction) for encryption.
+* Built-in customizable [retry policy](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly) for production-grade resilient HTTP requests made to the OAuth 2.0 authorization server.
+* Built as an extension for the [Microsoft.Extensions.Http](https://www.nuget.org/packages/Microsoft.Extensions.Http/) library.
+* Support for [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0).
+
+The **server-side library** includes:
+
+* JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
+* Default authorization policies, but you can still create your own policies.
+* Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
+* Support for ASP.NET Core 6 and later.
 
 ## Getting started
 
-Install the package `GSoft.Authentication.ClientCredentialsGrant` in the project where you want to register an HttpClient.
-This package contains the extension method that adds the access token management to an HttpClient.
-By default the library will bind options based on the name used to register the HttpClient, this allows having more than one client credentials configuration.
+### Client-side library
 
-## Example
+Install the package [GSoft.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) in your client-side application
+that needs to communicate with the protected ASP.NET Core server. Then, use one of the following methods to configure an authenticated `HttpClient`:
+
 ```csharp
-// appsettings.json
+// Method 1: directly set the options values with C# code
+services.AddHttpClient("MyClient").AddClientCredentialsHandler(options =>
 {
-  "ClientCredentialsHttpClients": {
-    "Service1": {
-      "Authority": "<authority_url>",
-      "ClientId": "<client_id>",
-      "ClientSecret": "<client_secret>",
-      "Scopes": [
-        "scope1",
-        "scope2"
-      ]
-    },
-    "Service2": {
-      "Authority": "<authority_url>",
-      "ClientId": "<client_id>",
-      "ClientSecret": "<client_secret>",
-      "Scopes": [
-        "scope"
-      ]
-    },
-    "OtherService": {
-      // ...
-    }
+    options.Authority = "<oauth2_authorization_server_base_url>";
+    options.ClientId = "<oauth2_client_id>";
+    options.ClientSecret = "<oauth2_client_secret>"; // use a secret store instead of hardcoding the value
+    options.Scope = "<optional_requested_scope>"; // use "Scopes" for multiple values
+});
+
+// Method 2: bind the options to a configuration section
+services.AddHttpClient("MyClient").AddClientCredentialsHandler(configuration.GetRequiredSection("MySection").Bind);
+
+// Method 3: Lazily bind the options to a configuration section
+services.AddHttpClient("MyClient").AddClientCredentialsHandler();
+services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(configSectionPath: "MySection");
+
+// appsettings.json:
+{
+  "MySection": {
+    "Authority": "<oauth2_authorization_server_base_url>",
+    "ClientId": "<oauth2_client_id>",
+    "ClientSecret": "<oauth2_client_secret>", // use a secret configuration provider instead of hardcoding the value
+    "Scope": "<optional_requested_scope>", // use "Scopes" for multiple values
   }
 }
 
-// HttpClient registration
-serivces.AddHttpClient("Service1").AddClientCredentialsHandler();
-serivces.AddHttpClient("Service2").AddClientCredentialsHandler(options => {
-    options.ClientId = "0cbc8ffa-cd51-48a1-8e21-cad7d008fc74" 
-});
+// You can also use the generic HttpClient registration with any of these methods:
+services.AddHttpClient<MyClient>().AddClientCredentialsHandler( /* [...] */);
+```
 
-// Example how to make an authenticated call
-internal sealed class MyCommandHandler
+Then, instantiate the `HttpClient` later on using `IHttpClientFactory` or directly inject the client if you used the generic registration:
+
+```csharp
+public class MyClient
 {
     private readonly HttpClient _httpClient;
 
-    public MyCommandHandler(IHttpClientFactory httpClientFactory)
+    public MyClient(IHttpClientFactory httpClientFactory)
     {
-        this._httpClient = httpClientFactory.CreateClient("Service2");
+        this._httpClient = httpClientFactory.CreateClient("MyClient");
     }
 
-    public async Task HandleAsync()
+    public async Task DoSomeAuthenticatedHttpCallAsync()
     {
-        await this._httpClient.GetStringAsync("https://targetservice.com");
+        await this._httpClient.GetStringAsync("https://myservice");
     }
 }
-
 ```
+
+
+### Server side library
+
+Documentation coming soon.
+
 
 ## Building, releasing and versioning
 
