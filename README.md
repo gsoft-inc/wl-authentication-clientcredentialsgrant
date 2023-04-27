@@ -9,17 +9,17 @@ This set of two libraries enables **authenticated machine-to-machine HTTP commun
 HTTP requests are authenticated with JSON web tokens (JWT) **issued by an OAuth 2.0 authorization server** using [the client credentials grant flow](https://www.rfc-editor.org/rfc/rfc6749#section-4.4).
 
 ```
-                      ┌───────────────────────────────┐
-           ┌─────────►│ OAuth2.0 authorization server │◄───────────┐
-           │          └───────────────────────────────┘            │
-           │                                                       │
-           │ get token with                       get signing keys │
-           │ client credentials grant flow                         │ validate
-           │                                                       │    token
-         ┌─┴───────────┐                           ┌───────────────┴────────┐
-         │ Client .NET ├──────────────────────────►│ Protected ASP.NET Core │
-         │ application │  authenticated HTTP call  │         service        │
-         └─────────────┘                           └────────────────────────┘
+                            ┌───────────────────────────────┐
+                 ┌─────────►│ OAuth2.0 authorization server │◄───────────┐
+                 │          └───────────────────────────────┘            │
+                 │                                                       │
+                 │ get token with                       get signing keys │
+                 │ client credentials grant flow                         │ validate
+                 │                                                       │    token
+               ┌─┴───────────┐                           ┌───────────────┴────────┐
+               │ Client .NET ├──────────────────────────►│ Protected ASP.NET Core │
+               │ application │  authenticated HTTP call  │         service        │
+               └─────────────┘                           └────────────────────────┘
 ```
 
 The **client-side library** includes:
@@ -35,7 +35,7 @@ The **server-side library** includes:
 * JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
 * Default authorization policies, but you can still create your own policies.
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
-* Support for ASP.NET Core 6 and later.
+* Support for ASP.NET Core 6.0 and later.
 
 ## Getting started
 
@@ -55,15 +55,15 @@ services.AddHttpClient("MyClient").AddClientCredentialsHandler(options =>
 });
 
 // Method 2: bind the options to a configuration section
-services.AddHttpClient("MyClient").AddClientCredentialsHandler(configuration.GetRequiredSection("MySection").Bind);
+services.AddHttpClient("MyClient").AddClientCredentialsHandler(configuration.GetRequiredSection("MyConfigSection").Bind);
 
 // Method 3: Lazily bind the options to a configuration section
 services.AddHttpClient("MyClient").AddClientCredentialsHandler();
-services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(configSectionPath: "MySection");
+services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(configSectionPath: "MyConfigSection");
 
 // appsettings.json:
 {
-  "MySection": {
+  "MyConfigSection": {
     "Authority": "<oauth2_authorization_server_base_url>",
     "ClientId": "<oauth2_client_id>",
     "ClientSecret": "<oauth2_client_secret>", // use a secret configuration provider instead of hardcoding the value
@@ -75,7 +75,7 @@ services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(conf
 services.AddHttpClient<MyClient>().AddClientCredentialsHandler( /* [...] */);
 ```
 
-Then, instantiate the `HttpClient` later on using `IHttpClientFactory` or directly inject the client if you used the generic registration:
+Then, instantiate the `HttpClient` later on using `IHttpClientFactory` or directly inject it in the constructor if you used the generic registration:
 
 ```csharp
 public class MyClient
