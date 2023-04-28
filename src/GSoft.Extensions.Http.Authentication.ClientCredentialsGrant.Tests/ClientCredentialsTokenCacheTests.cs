@@ -47,11 +47,12 @@ public class ClientCredentialsTokenCacheTests
         await this._tokenCache.SetAsync(TestClientName, token, CancellationToken.None);
 
         object ignored;
+        A.CallTo(() => this._tokenSerializer.Serialize(TestClientName, A<ClientCredentialsToken>._)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._memoryCache.CreateEntry(TestCacheKey)).MustHaveHappenedOnceExactly())
+            .Then(A.CallTo(() => this._distributedCache.SetAsync(TestCacheKey, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustHaveHappenedOnceExactly());
+
         A.CallTo(() => this._memoryCache.TryGetValue(A<string>._, out ignored)).MustNotHaveHappened();
-        A.CallTo(() => this._memoryCache.CreateEntry(TestCacheKey)).MustHaveHappenedOnceExactly();
         A.CallTo(() => this._distributedCache.GetAsync(A<string>._, CancellationToken.None)).MustNotHaveHappened();
-        A.CallTo(() => this._distributedCache.SetAsync(TestCacheKey, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._tokenSerializer.Serialize(TestClientName, A<ClientCredentialsToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => this._tokenSerializer.Deserialize(A<string>._, A<byte[]>._)).MustNotHaveHappened();
     }
 
@@ -62,9 +63,10 @@ public class ClientCredentialsTokenCacheTests
         Assert.Null(actualToken);
 
         object ignored;
-        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly());
+
         A.CallTo(() => this._memoryCache.CreateEntry(A<object>._)).MustNotHaveHappened();
-        A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly();
         A.CallTo(() => this._distributedCache.SetAsync(A<string>._, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._tokenSerializer.Serialize(A<string>._, A<ClientCredentialsToken>._)).MustNotHaveHappened();
         A.CallTo(() => this._tokenSerializer.Deserialize(A<string>._, A<byte[]>._)).MustNotHaveHappened();
@@ -81,12 +83,13 @@ public class ClientCredentialsTokenCacheTests
         Assert.NotSame(expectedToken, actualToken);
 
         object ignored;
-        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly());
+
         A.CallTo(() => this._memoryCache.CreateEntry(A<string>._)).MustNotHaveHappened();
         A.CallTo(() => this._distributedCache.GetAsync(A<string>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._distributedCache.SetAsync(A<string>._, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._tokenSerializer.Serialize(A<string>._, A<ClientCredentialsToken>._)).MustNotHaveHappened();
-        A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -101,12 +104,13 @@ public class ClientCredentialsTokenCacheTests
         Assert.NotSame(expectedToken, actualToken);
 
         object ignored;
-        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly());
+
         A.CallTo(() => this._memoryCache.CreateEntry(A<string>._)).MustNotHaveHappened();
         A.CallTo(() => this._distributedCache.GetAsync(A<string>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._distributedCache.SetAsync(A<string>._, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._tokenSerializer.Serialize(A<string>._, A<ClientCredentialsToken>._)).MustNotHaveHappened();
-        A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -120,12 +124,13 @@ public class ClientCredentialsTokenCacheTests
         Assert.NotSame(expectedToken, actualToken);
 
         object ignored;
-        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._memoryCache.CreateEntry(TestCacheKey)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly())
+            .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly())
+            .Then(A.CallTo(() => this._memoryCache.CreateEntry(TestCacheKey)).MustHaveHappenedOnceExactly());
+
         A.CallTo(() => this._distributedCache.SetAsync(A<string>._, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustNotHaveHappened();
         A.CallTo(() => this._tokenSerializer.Serialize(A<string>._, A<ClientCredentialsToken>._)).MustNotHaveHappened();
-        A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly();
     }
 
     private void AddTokenToL1Cache(string cacheKey, ClientCredentialsToken token)

@@ -70,8 +70,8 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
         var result = await this._clientCredentialsHttpClient.GetStringAsync("https://whatever", CancellationToken.None);
         Assert.Equal("Access granted on second attempt", result);
 
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly());
     }
 
     [Fact]
@@ -86,8 +86,8 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this._clientCredentialsHttpClient.GetStringAsync("https://whatever", CancellationToken.None));
         Assert.Equal(HttpStatusCode.Unauthorized, ex.StatusCode);
 
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly());
     }
 
     [Fact]
@@ -103,8 +103,8 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
         var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this._clientCredentialsHttpClient.GetStringAsync("https://whatever", CancellationToken.None));
         Assert.Equal(HttpStatusCode.Unauthorized, ex.StatusCode);
 
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly()
+            .Then(A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustHaveHappenedOnceExactly());
     }
 
     [Theory]
