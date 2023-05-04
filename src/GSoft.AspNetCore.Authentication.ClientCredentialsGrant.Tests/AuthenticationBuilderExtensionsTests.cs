@@ -1,13 +1,12 @@
-﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Tests;
 
-public class AuthenticationBuilderExtensionsTest
+public class AuthenticationBuilderExtensionsTests
 {
     [Fact]
     public async Task GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet()
@@ -90,19 +89,19 @@ public class AuthenticationBuilderExtensionsTest
         
         var jwtBearerOptions = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(ClientCredentialsDefaults.AuthenticationScheme);
         
-        Assert.Null( jwtBearerOptions.Audience);
+        Assert.Null(jwtBearerOptions.Audience);
         Assert.Null(jwtBearerOptions.Authority);
     }
     
     [Fact]
     public async Task GivenNoAuthenticationBuilder_WhenCalling_ThrowArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null));
+        Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null!));
     }
     
     [Fact]
     public async Task GivenNoAuthenticationBuilder_WhenCallingWithScheme_ThrowArgumentNullException()
     {
-        Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null, "SomeScheme", options => { }));
+        Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null!, "SomeScheme", options => { }));
     }
 }

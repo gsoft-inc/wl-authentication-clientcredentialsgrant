@@ -1,5 +1,4 @@
 #nullable enable
-GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Extensions.AuthenticationBuilderExtensions
 const GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults.AuthenticationScheme = "ClientCredentials" -> string!
 const GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults.ClientCredentialsConfigSection = "Authentication:Schemes:ClientCredentials" -> string!
 GSoft.AspNetCore.Authentication.ClientCredentialsGrant.AuthenticationBuilderExtensions
