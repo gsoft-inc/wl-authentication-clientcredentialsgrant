@@ -1,1 +1,9 @@
 #nullable enable
+GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Extensions.AuthenticationBuilderExtensions
+const GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults.AuthenticationScheme = "ClientCredentials" -> string!
+const GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults.ClientCredentialsConfigSection = "Authentication:Schemes:ClientCredentials" -> string!
+GSoft.AspNetCore.Authentication.ClientCredentialsGrant.AuthenticationBuilderExtensions
+GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults
+static GSoft.AspNetCore.Authentication.ClientCredentialsGrant.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! authBuilder) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+static GSoft.AspNetCore.Authentication.ClientCredentialsGrant.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! authBuilder, string! authScheme) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+static GSoft.AspNetCore.Authentication.ClientCredentialsGrant.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! authBuilder, string! authScheme, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!

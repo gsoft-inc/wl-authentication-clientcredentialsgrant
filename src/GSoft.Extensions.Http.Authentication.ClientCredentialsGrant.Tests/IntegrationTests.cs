@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Duende.IdentityServer.Models;
+using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -65,8 +66,9 @@ public class IntegrationTests
             .AddInMemoryApiScopes(identityApiScopes);
 
         // Create the authorization policy that will be used to protect our invoices endpoints
-        webAppBuilder.Services.AddAuthentication().AddJwtBearer();
-        webAppBuilder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
+        webAppBuilder.Services.AddAuthentication().AddClientCredentials();
+        
+        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
         {
             options.Audience = "invoices";
             options.Authority = "https://identity.local";
@@ -76,8 +78,8 @@ public class IntegrationTests
         // This invoice authorization policy must be individually applied to endpoints
         webAppBuilder.Services.AddAuthorization(options =>
         {
-            options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
-            options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
+            options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
+            options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
         });
 
         // Change the primary HTTP message handler of this library to communicate with this in-memory test server without accessing the network
