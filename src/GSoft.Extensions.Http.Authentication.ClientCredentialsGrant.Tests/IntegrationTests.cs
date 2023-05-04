@@ -67,7 +67,6 @@ public class IntegrationTests
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddClientCredentials();
-        
         webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
         {
             options.Audience = "invoices";
