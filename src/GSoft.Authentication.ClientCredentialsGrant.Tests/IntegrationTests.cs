@@ -68,7 +68,7 @@ public class IntegrationTests
             .AddInMemoryApiScopes(identityApiScopes);
 
         // Create the authorization policy that will be used to protect our invoices endpoints
-        webAppBuilder.Services.AddAuthentication().AddJwtBearer();
+        webAppBuilder.Services.AddAuthentication().AddClientCredentials();
         webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
         {
             options.Audience = Audience;

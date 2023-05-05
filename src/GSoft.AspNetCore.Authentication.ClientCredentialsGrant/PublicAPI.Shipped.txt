@@ -1,1 +1,5 @@
 #nullable enable
+Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions
+static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, string! authScheme, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
