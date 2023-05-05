@@ -13,8 +13,8 @@ public class AuthenticationBuilderExtensionsTests
     {
         var inMemorySettings = new Dictionary<string, string>
         {
-            { $"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Authority", "https://identity.local" },
-            { $"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Audience", "audience" },
+            [$"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Authority"] = "https://identity.local",
+            [$"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Audience"] = "audience",
         };
         
         var services = new ServiceCollection();
@@ -62,8 +62,8 @@ public class AuthenticationBuilderExtensionsTests
         var authScheme = "authScheme";
         var inMemorySettings = new Dictionary<string, string>
         {
-            { $"Authentication:Schemes:{authScheme}:Authority", "https://identity.local" },
-            { $"Authentication:Schemes:{authScheme}:Audience", "audience" },
+            [$"Authentication:Schemes:{authScheme}:Authority"] = "https://identity.local",
+            [$"Authentication:Schemes:{authScheme}:Audience"] = "audience",
         };
         
         var services = new ServiceCollection();
