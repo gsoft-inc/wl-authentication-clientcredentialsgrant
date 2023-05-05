@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Duende.IdentityServer.Models;
-using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;

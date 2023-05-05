@@ -1,26 +1,31 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AuthenticationBuilderExtensions
 {
-    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder authBuilder, string authScheme)
-        => authBuilder.AddClientCredentials(authScheme, _ => { });
+    private const string AuthenticationSchemesKey = "Schemes";
+    private const string AuthenticationConfigKey = "Authentication";
     
-    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder authBuilder)
+    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder)
+        => builder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, _ => { });
+        
+    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder, Action<JwtBearerOptions> configureOptions)
+        => builder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
+
+    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder, string authScheme, Action<JwtBearerOptions> configureOptions)
     {
-        if (authBuilder == null)
+        if (builder == null)
         {
-            throw new ArgumentNullException(nameof(authBuilder));
+            throw new ArgumentNullException(nameof(builder));
         }
 
-        authBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme)
+        builder.Services.AddOptions<JwtBearerOptions>(authScheme)
             .Configure<IConfiguration>((options, configuration) =>
         {
-            var configSection = configuration.GetSection(ClientCredentialsDefaults.ClientCredentialsConfigSection);
+            var configSection = configuration.GetSection($"{AuthenticationConfigKey}:{AuthenticationSchemesKey}:{authScheme}");
             if (configSection is null || !configSection.GetChildren().Any())
             {
                 return;
@@ -29,20 +34,8 @@ public static class AuthenticationBuilderExtensions
             configSection.Bind(options);
         });
 
-        authBuilder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, _ => { });
+        builder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
         
-        return authBuilder;
-    }
-
-    public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder authBuilder, string authScheme, Action<JwtBearerOptions> configureOptions)
-    {
-        if (authBuilder == null)
-        {
-            throw new ArgumentNullException(nameof(authBuilder));
-        }
-
-        authBuilder.AddJwtBearer(authScheme, configureOptions);
-
-        return authBuilder;
+        return builder;
     }
 }

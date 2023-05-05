@@ -4,17 +4,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
 
 public class AuthenticationBuilderExtensionsTests
 {
     [Fact]
-    public async Task GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet()
+    public void GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet()
     {
         var inMemorySettings = new Dictionary<string, string>
         {
-            { $"{ClientCredentialsDefaults.ClientCredentialsConfigSection}:Authority", "https://identity.local" },
-            { $"{ClientCredentialsDefaults.ClientCredentialsConfigSection}:Audience", "audience" },
+            { $"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Authority", "https://identity.local" },
+            { $"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Audience", "audience" },
         };
         
         var services = new ServiceCollection();
@@ -22,6 +22,7 @@ public class AuthenticationBuilderExtensionsTests
         services.AddSingleton<IConfiguration>(configuration);
         
         var authenticationBuilder = new AuthenticationBuilder(services);
+        
         authenticationBuilder.AddClientCredentials();
 
         var sp = services.BuildServiceProvider();
@@ -33,11 +34,12 @@ public class AuthenticationBuilderExtensionsTests
     }
     
     [Fact]
-    public async Task GivenAnAuthenticationBuilder_WhenOptionsAreConfigured_ThenOptionsAreSet()
+    public void GivenAnAuthenticationBuilder_WhenOptionsAreConfigured_ThenOptionsAreSet()
     {
         var services = new ServiceCollection();
         var authenticationBuilder = new AuthenticationBuilder(services);
         
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme)
             .Configure(options =>
             {
@@ -45,7 +47,7 @@ public class AuthenticationBuilderExtensionsTests
                 options.Authority = "https://identity.local";
             });
         
-        authenticationBuilder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme);
+        authenticationBuilder.AddClientCredentials();
 
         var sp = services.BuildServiceProvider();
         
@@ -56,10 +58,11 @@ public class AuthenticationBuilderExtensionsTests
     }    
     
     [Fact]
-    public async Task GivenAnAuthenticationBuilder_WhenOptionsAreConfiguredWithAnAction_ThenOptionsAreSet()
+    public void GivenAnAuthenticationBuilder_WhenOptionsAreConfiguredWithAnAction_ThenOptionsAreSet()
     {
         var services = new ServiceCollection();
         var authenticationBuilder = new AuthenticationBuilder(services);
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         
         authenticationBuilder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, options =>
         {
@@ -76,7 +79,7 @@ public class AuthenticationBuilderExtensionsTests
     }    
     
     [Fact]
-    public async Task GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet2()
+    public void GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet2()
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder().Build();
@@ -94,14 +97,8 @@ public class AuthenticationBuilderExtensionsTests
     }
     
     [Fact]
-    public async Task GivenNoAuthenticationBuilder_WhenCalling_ThrowArgumentNullException()
+    public void GivenNoAuthenticationBuilder_WhenCalling_ThrowArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null!));
-    }
-    
-    [Fact]
-    public async Task GivenNoAuthenticationBuilder_WhenCallingWithScheme_ThrowArgumentNullException()
-    {
-        Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null!, "SomeScheme", options => { }));
     }
 }
