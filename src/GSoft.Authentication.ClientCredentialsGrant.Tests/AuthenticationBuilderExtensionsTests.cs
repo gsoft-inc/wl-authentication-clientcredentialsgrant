@@ -34,6 +34,55 @@ public class AuthenticationBuilderExtensionsTests
     }
     
     [Fact]
+    public void GivenAnAuthenticationBuilder_WhenActionConfigsIsPresent_ThenOptionsAreSet()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+        services.AddSingleton<IConfiguration>(configuration);
+        
+        var authenticationBuilder = new AuthenticationBuilder(services);
+        
+        authenticationBuilder.AddClientCredentials(option =>
+        {
+            option.Authority = "https://identity.local";
+            option.Audience = "audience";
+        });
+
+        var sp = services.BuildServiceProvider();
+        
+        var jwtBearerOptions = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(ClientCredentialsDefaults.AuthenticationScheme);
+        
+        Assert.Equal("audience", jwtBearerOptions.Audience);
+        Assert.Equal("https://identity.local", jwtBearerOptions.Authority);
+    }
+    
+    [Fact]
+    public void GivenAnAuthenticationBuilder_WhenUsingCustomSchema_ThenOptionsAreSet()
+    {
+        var authScheme = "authScheme";
+        var inMemorySettings = new Dictionary<string, string>
+        {
+            { $"Authentication:Schemes:{authScheme}:Authority", "https://identity.local" },
+            { $"Authentication:Schemes:{authScheme}:Audience", "audience" },
+        };
+        
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
+        services.AddSingleton<IConfiguration>(configuration);
+        
+        var authenticationBuilder = new AuthenticationBuilder(services);
+
+        authenticationBuilder.AddClientCredentials(authScheme, _ => { });
+
+        var sp = services.BuildServiceProvider();
+        
+        var jwtBearerOptions = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(authScheme);
+        
+        Assert.Equal("audience", jwtBearerOptions.Audience);
+        Assert.Equal("https://identity.local", jwtBearerOptions.Authority);
+    }
+    
+    [Fact]
     public void GivenAnAuthenticationBuilder_WhenOptionsAreConfigured_ThenOptionsAreSet()
     {
         var services = new ServiceCollection();
