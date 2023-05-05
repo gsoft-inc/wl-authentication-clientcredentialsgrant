@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Duende.IdentityServer.Models;
+using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -14,6 +15,8 @@ namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
 
 public class IntegrationTests
 {
+    private const string Audience = "invoices";
+
     private readonly ITestOutputHelper _testOutputHelper;
 
     public IntegrationTests(ITestOutputHelper testOutputHelper)
@@ -27,14 +30,14 @@ public class IntegrationTests
         // Define some OAuth 2.0 scopes for fictional invoices access management
         var identityApiScopes = new[]
         {
-            new ApiScope("invoice.read", "Reads your invoices."),
-            new ApiScope("invoice.pay", "Pays your invoices."),
+            new ApiScope($"{Audience}:read", "Reads your invoices."),
+            new ApiScope($"{Audience}:pay", "Pays your invoices."),
         };
 
         // Define the protected resources, here an invoice API (represents something we want to communicate with)
         var identityApiResources = new[]
         {
-            new ApiResource("invoices", "Invoice API") { Scopes = { "invoice.read", "invoice.pay" } },
+            new ApiResource(Audience, "Invoice API") { Scopes = { $"{Audience}:read", $"{Audience}:pay" } },
         };
 
         // Define the OAuth 2.0 clients and the scopes that can be granted
@@ -46,7 +49,7 @@ public class IntegrationTests
                 ClientId = "invoices_read_client",
                 ClientSecrets = new[] { new Secret("invoices_read_client_secret".Sha256()) },
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                AllowedScopes = { "invoice.read" },
+                AllowedScopes = { $"{Audience}:read" },
             },
         };
 
@@ -66,19 +69,21 @@ public class IntegrationTests
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddJwtBearer();
-        webAppBuilder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
+        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
         {
-            options.Audience = "invoices";
+            options.Audience = Audience;
             options.Authority = "https://identity.local";
             options.Backchannel = testServer.CreateClient();
         });
 
         // This invoice authorization policy must be individually applied to endpoints
-        webAppBuilder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
-            options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
-        });
+        webAppBuilder.Services.AddClientCredentialsAuthorization();
+
+        // webAppBuilder.Services.AddAuthorization(options =>
+        // {
+        //     options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
+        //     options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
+        // });
 
         // Change the primary HTTP message handler of this library to communicate with this in-memory test server without accessing the network
         webAppBuilder.Services.AddHttpClient(ClientCredentialsConstants.BackchannelHttpClientName)
@@ -93,7 +98,7 @@ public class IntegrationTests
                 options.Authority = "https://identity.local";
                 options.ClientId = "invoices_read_client";
                 options.ClientSecret = "invoices_read_client_secret";
-                options.Scope = "invoice.read";
+                options.Scope = $"{Audience}:read";
             });
 
         // Here begins ASP.NET Core middleware pipelines registration
@@ -103,10 +108,10 @@ public class IntegrationTests
         webApp.UseAuthorization();
 
         webApp.MapGet("/public", () => "This endpoint is public").RequireHost("invoice-app.local");
-        webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization("invoices_read_policy").RequireHost("invoice-app.local");
-        webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization("invoices_pay_policy").RequireHost("invoice-app.local");
+        webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationReadPolicy).RequireHost("invoice-app.local");
+        webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationWritePolicy).RequireHost("invoice-app.local");
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         try
         {
