@@ -1,17 +1,19 @@
+using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AuthenticationBuilderExtensions
 {
     private const string AuthenticationSchemesKey = "Schemes";
     private const string AuthenticationConfigKey = "Authentication";
-    
+
     public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder)
         => builder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, _ => { });
-        
+
     public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder, Action<JwtBearerOptions> configureOptions)
         => builder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
 
@@ -22,8 +24,7 @@ public static class AuthenticationBuilderExtensions
             throw new ArgumentNullException(nameof(builder));
         }
 
-        builder.Services.AddOptions<JwtBearerOptions>(authScheme)
-            .Configure<IConfiguration>((options, configuration) =>
+        builder.Services.AddOptions<JwtBearerOptions>(authScheme).Configure<IConfiguration>((options, configuration) =>
         {
             var configSection = configuration.GetSection($"{AuthenticationConfigKey}:{AuthenticationSchemesKey}:{authScheme}");
             if (configSection is null || !configSection.GetChildren().Any())
@@ -35,7 +36,7 @@ public static class AuthenticationBuilderExtensions
         });
 
         builder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
-        
+
         return builder;
     }
 }

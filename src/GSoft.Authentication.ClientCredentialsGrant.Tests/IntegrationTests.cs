@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using Duende.IdentityServer.Models;
 using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -11,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Secret = Duende.IdentityServer.Models.Secret;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class IntegrationTests
 {
@@ -60,6 +62,7 @@ public class IntegrationTests
         // Here begins services registrations in the dependency injection container
         webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).ClearProviders().AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
         webAppBuilder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
+        webAppBuilder.Services.AddSingleton<TestServerClient>();
         webAppBuilder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
         webAppBuilder.Services.AddIdentityServer()
@@ -69,21 +72,15 @@ public class IntegrationTests
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddClientCredentials();
-        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
+        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServerClient>((options, testServerClient) =>
         {
             options.Audience = Audience;
             options.Authority = "https://identity.local";
-            options.Backchannel = testServer.CreateClient();
+            options.Backchannel = testServerClient;
         });
 
         // This invoice authorization policy must be individually applied to endpoints
         webAppBuilder.Services.AddClientCredentialsAuthorization();
-
-        // webAppBuilder.Services.AddAuthorization(options =>
-        // {
-        //     options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
-        //     options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
-        // });
 
         // Change the primary HTTP message handler of this library to communicate with this in-memory test server without accessing the network
         webAppBuilder.Services.AddHttpClient(ClientCredentialsConstants.BackchannelHttpClientName)
@@ -140,6 +137,23 @@ public class IntegrationTests
         {
             // Shut down the web app
             cts.Cancel();
+        }
+    }
+
+    private sealed class TestServerClient : HttpClient
+    {
+        private readonly TestServer _testServer;
+        private HttpClient? _testServerClient;
+
+        public TestServerClient(TestServer testServer)
+        {
+            this._testServer = testServer;
+        }
+
+        public override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            this._testServerClient ??= this._testServer.CreateClient();
+            return this._testServerClient.SendAsync(request, cancellationToken);
         }
     }
 }

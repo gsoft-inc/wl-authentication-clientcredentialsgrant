@@ -1,6 +1,7 @@
-﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Enums;
+﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
+using Microsoft.AspNetCore.Authorization;
 
-namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class ClientCredentialsAuthorizeAttributeTests
 {

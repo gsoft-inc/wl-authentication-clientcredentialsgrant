@@ -1,11 +1,11 @@
-﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Enums;
+﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class AuthorizationExtensionsTest
 {

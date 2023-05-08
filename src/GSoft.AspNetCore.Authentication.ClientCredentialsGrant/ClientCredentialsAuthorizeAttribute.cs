@@ -1,7 +1,7 @@
-﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant.Enums;
-using Microsoft.AspNetCore.Authorization;
+﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 
-namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.Authorization;
 
 public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
 {
@@ -14,6 +14,9 @@ public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
 
     public ClientCredentialsAuthorizeAttribute(ClientCredentialsScope scope)
     {
-        this.Policy = _policyScopeMapping.GetValueOrDefault(scope);
+        this.Scope = scope;
+        this.Policy = this._policyScopeMapping.GetValueOrDefault(scope);
     }
+
+    public ClientCredentialsScope Scope { get; }
 }
