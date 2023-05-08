@@ -2,6 +2,8 @@ using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -37,6 +39,19 @@ public static class AuthenticationBuilderExtensions
 
         builder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
 
+        var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsValidateJwtBearerOptionsDescriptor(x, authScheme));
+        if (!tokenHandlerNamedConfigureOptionsAlreadyAdded)
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<JwtBearerOptions>>(new ValidateJwtBearerOptions(authScheme)));
+        }
+
         return builder;
+    }
+
+    private static bool IsValidateJwtBearerOptionsDescriptor(ServiceDescriptor serviceDescriptor, string name)
+    {
+        return serviceDescriptor.ServiceType == typeof(IValidateOptions<JwtBearerOptions>)
+               && serviceDescriptor.ImplementationInstance is ValidateJwtBearerOptions configureOptions
+               && configureOptions.AuthScheme == name;
     }
 }

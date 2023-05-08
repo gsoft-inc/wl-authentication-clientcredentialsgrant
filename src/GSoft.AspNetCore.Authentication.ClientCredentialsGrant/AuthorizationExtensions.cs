@@ -1,7 +1,6 @@
 ﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -22,8 +21,6 @@ public static class AuthorizationExtensions
         {
             throw new ArgumentNullException(nameof(services));
         }
-
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<JwtBearerOptions>, ValidateJwtBearerOptions>());
 
         services.AddAuthorization();
         services.AddOptions<AuthorizationOptions>()

@@ -1,5 +1,6 @@
 ﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -9,12 +10,12 @@ public class JwtBearerOptionsTests
 {
     [Theory]
     [MemberData(nameof(CreateTestCases))]
-    public void JwtBearerOptions_Validation_Works(OptionsValidationTestData testData)
+    public void Given_Faulty_JwtBearerOptions_When_GetOptions_Then_Throws(OptionsValidationTestData testData)
     {
         var services = new ServiceCollection();
-        services.AddAuthentication().AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, testData.ConfigureOptions);
-
-        services.AddClientCredentialsAuthorization();
+        services.AddSingleton<IConfiguration, ConfigurationManager>();
+        services.AddAuthentication()
+            .AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, testData.ConfigureOptions);
 
         using var serviceProvider = services.BuildServiceProvider();
         var optionsSnapshot = serviceProvider.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>();
@@ -33,20 +34,35 @@ public class JwtBearerOptionsTests
     [Theory]
     [InlineData("authority")]
     [InlineData("http://authority.io")]
-    public void Given_JwtBearerOptions_With_Http_Authority_When_Get_Options_Then_Throws(string authority)
+    public void Given_JwtBearerOptions_With_Http_Authority_When_GetOptions_Then_Throws(string authority)
     {
         var services = new ServiceCollection();
-        services.AddAuthentication().AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, opt =>
-        {
-            opt.Authority = authority;
-        });
-
-        services.AddClientCredentialsAuthorization();
+        services.AddSingleton<IConfiguration, ConfigurationManager>();
+        services.AddAuthentication()
+            .AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, opt =>
+            {
+                opt.Authority = authority;
+            });
 
         using var serviceProvider = services.BuildServiceProvider();
         var optionsSnapshot = serviceProvider.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>();
 
         Assert.Throws<InvalidOperationException>(() => optionsSnapshot.Get(ClientCredentialsDefaults.AuthenticationScheme));
+    }
+
+    [Fact]
+    public void Given_Other_JwtBearerOptions_Without_Authority_When_GetOptions_Then_No_Validation()
+    {
+        var services = new ServiceCollection();
+        services.AddAuthentication().AddJwtBearer("OtherScheme", opt =>
+        {
+            opt.Authority = "https://authority.io";
+        });
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var optionsSnapshot = serviceProvider.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>();
+
+        _ = optionsSnapshot.Get("OtherScheme");
     }
 
     public static IEnumerable<object[]> CreateTestCases()
