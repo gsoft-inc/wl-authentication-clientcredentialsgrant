@@ -13,5 +13,6 @@ public class ClientCredentialsAuthorizeAttributeTests
     {
         var attribute = new ClientCredentialsAuthorizeAttribute(scope);
         Assert.Equal(expectedPolicy, attribute.Policy);
+        Assert.Equal(scope, attribute.Scope);
     }
 }

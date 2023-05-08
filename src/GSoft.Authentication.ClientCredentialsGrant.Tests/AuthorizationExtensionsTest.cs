@@ -13,6 +13,12 @@ public class AuthorizationExtensionsTest
     private const string DefaultAuthority = "authority.io";
 
     [Fact]
+    public void GivenNullIServiceCollection_When_AddClientCredentialsAuthorization_Then_ThrowArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => AuthorizationExtensions.AddClientCredentialsAuthorization(null!));
+    }
+
+    [Fact]
     public async Task Given_IServiceCollection_When_AddClientCredentialsAuthorization_Then_Policies_Set()
     {
         // Given
@@ -71,7 +77,7 @@ public class AuthorizationExtensionsTest
                 Assert.NotNull(requirement.AllowedValues);
 
                 var allowedScope = Assert.Single(requirement.AllowedValues);
-                Assert.Equal($"{DefaultAudience}:{scope}", allowedScope);
+                Assert.Equal($"{DefaultAudience}:{AuthorizationExtensions.ScopeClaimMapping[scope]}", allowedScope);
             });
     }
 }

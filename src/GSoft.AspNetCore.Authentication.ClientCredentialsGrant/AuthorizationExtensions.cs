@@ -1,6 +1,7 @@
 ﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -8,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class AuthorizationExtensions
 {
-    private static readonly Dictionary<ClientCredentialsScope, string> ScopeClaimMapping = new()
+    internal static readonly Dictionary<ClientCredentialsScope, string> ScopeClaimMapping = new()
     {
         [ClientCredentialsScope.Read] = "read",
         [ClientCredentialsScope.Write] = "write",
