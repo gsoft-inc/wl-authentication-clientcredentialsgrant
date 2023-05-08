@@ -10,7 +10,7 @@ namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 public class AuthorizationExtensionsTest
 {
     private const string DefaultAudience = "serviceA";
-    private const string DefaultAuthority = "authority.io";
+    private const string DefaultAuthority = "Https://authority.io";
 
     [Fact]
     public void GivenNullIServiceCollection_When_AddClientCredentialsAuthorization_Then_ThrowArgumentNullException()
