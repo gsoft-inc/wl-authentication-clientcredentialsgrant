@@ -140,10 +140,7 @@ public class AuthenticationBuilderExtensionsTests
 
         var sp = services.BuildServiceProvider();
 
-        var jwtBearerOptions = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(ClientCredentialsDefaults.AuthenticationScheme);
-
-        Assert.Null(jwtBearerOptions.Audience);
-        Assert.Null(jwtBearerOptions.Authority);
+        Assert.Throws<OptionsValidationException>(() => sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(ClientCredentialsDefaults.AuthenticationScheme));
     }
 
     [Fact]
