@@ -14,8 +14,13 @@ public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
 
     public ClientCredentialsAuthorizeAttribute(ClientCredentialsScope scope)
     {
+        if (!this._policyScopeMapping.TryGetValue(scope, out var policy))
+        {
+            throw new ArgumentException($"${scope} is not an valid scope value");
+        }
+
         this.Scope = scope;
-        this.Policy = this._policyScopeMapping.GetValueOrDefault(scope);
+        this.Policy = policy;
     }
 
     public ClientCredentialsScope Scope { get; }
