@@ -61,7 +61,7 @@ public class IntegrationTests
         // Here begins services registrations in the dependency injection container
         webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).ClearProviders().AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
         webAppBuilder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
-        webAppBuilder.Services.AddSingleton<TestServerClient>();
+        webAppBuilder.Services.AddSingleton<TestServerHandler>();
         webAppBuilder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
         webAppBuilder.Services.AddIdentityServer()
@@ -71,7 +71,7 @@ public class IntegrationTests
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddClientCredentials();
-        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServerClient>((options, testServerClient) =>
+        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServerHandler>((options, testServerClient) =>
         {
             options.Audience = Audience;
             options.Authority = "https://identity.local";
@@ -139,12 +139,12 @@ public class IntegrationTests
         }
     }
 
-    private sealed class TestServerClient : DelegatingHandler
+    private sealed class TestServerHandler : DelegatingHandler
     {
         private readonly TestServer _testServer;
         private HttpClient? _testServerClient;
 
-        public TestServerClient(TestServer testServer)
+        public TestServerHandler(TestServer testServer)
         {
             this._testServer = testServer;
         }
