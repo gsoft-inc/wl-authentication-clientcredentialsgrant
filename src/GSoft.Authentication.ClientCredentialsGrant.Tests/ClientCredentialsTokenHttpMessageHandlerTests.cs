@@ -1,7 +1,8 @@
 ﻿using System.Net;
 using FakeItEasy;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
 {

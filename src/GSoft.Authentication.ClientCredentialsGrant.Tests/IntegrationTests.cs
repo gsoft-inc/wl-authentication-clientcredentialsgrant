@@ -2,7 +2,6 @@
 using Duende.IdentityServer.Models;
 using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
-using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
