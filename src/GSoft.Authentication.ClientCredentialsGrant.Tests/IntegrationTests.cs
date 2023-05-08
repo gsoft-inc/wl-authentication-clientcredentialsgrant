@@ -76,7 +76,7 @@ public class IntegrationTests
         {
             options.Audience = Audience;
             options.Authority = "https://identity.local";
-            options.Backchannel = testServerClient;
+            options.BackchannelHttpHandler = testServerClient;
         });
 
         // This invoice authorization policy must be individually applied to endpoints
@@ -140,7 +140,7 @@ public class IntegrationTests
         }
     }
 
-    private sealed class TestServerClient : HttpClient
+    private sealed class TestServerClient : DelegatingHandler
     {
         private readonly TestServer _testServer;
         private HttpClient? _testServerClient;
@@ -150,10 +150,46 @@ public class IntegrationTests
             this._testServer = testServer;
         }
 
-        public override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             this._testServerClient ??= this._testServer.CreateClient();
-            return this._testServerClient.SendAsync(request, cancellationToken);
+
+            var cloneRequest = await this.CloneHttpRequest(request, cancellationToken);
+
+            return await this._testServerClient.SendAsync(cloneRequest, cancellationToken);
+        }
+
+        private async Task<HttpRequestMessage> CloneHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var cloneRequest = new HttpRequestMessage(request.Method, request.RequestUri);
+            cloneRequest.Version = request.Version;
+
+            foreach (var (key, value) in request.Headers)
+            {
+                cloneRequest.Headers.TryAddWithoutValidation(key, value);
+            }
+
+            foreach (var (key, value) in request.Options)
+            {
+                cloneRequest.Options.TryAdd(key, value);
+            }
+
+            if (request.Content != null)
+            {
+                var ms = new MemoryStream();
+                await request.Content.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
+                ms.Position = 0;
+
+                var streamContent = new StreamContent(ms);
+                foreach (KeyValuePair<string, IEnumerable<string>> header in request.Content.Headers)
+                {
+                    streamContent.Headers.Add(header.Key, header.Value);
+                }
+
+                cloneRequest.Content = streamContent;
+            }
+
+            return cloneRequest;
         }
     }
 }
