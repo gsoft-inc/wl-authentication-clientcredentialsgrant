@@ -154,6 +154,7 @@ public class IntegrationTests
         {
             this._testServerClient ??= this._testServer.CreateClient();
 
+            // Request has to be cloned since it has already gone through the httpclient wrapping this handler even though the request hasn't been sent yet.
             var cloneRequest = await this.CloneHttpRequest(request, cancellationToken);
 
             return await this._testServerClient.SendAsync(cloneRequest, cancellationToken);
