@@ -1,7 +1,6 @@
 ﻿using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
