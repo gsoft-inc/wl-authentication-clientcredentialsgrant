@@ -176,17 +176,13 @@ public class IntegrationTests
 
             if (request.Content != null)
             {
-                var ms = new MemoryStream();
-                await request.Content.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
-                ms.Position = 0;
+                var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken);
+                cloneRequest.Content = new ByteArrayContent(contentBytes);
 
-                var streamContent = new StreamContent(ms);
-                foreach (KeyValuePair<string, IEnumerable<string>> header in request.Content.Headers)
+                foreach (var (key, value) in request.Content.Headers)
                 {
-                    streamContent.Headers.Add(header.Key, header.Value);
+                    cloneRequest.Content.Headers.TryAddWithoutValidation(key, value);
                 }
-
-                cloneRequest.Content = streamContent;
             }
 
             return cloneRequest;
