@@ -54,6 +54,7 @@ public class JwtBearerOptionsTests
     public void Given_Other_JwtBearerOptions_Without_Authority_When_GetOptions_Then_No_Validation()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddAuthentication().AddJwtBearer("OtherScheme", opt =>
         {
             opt.Authority = "https://authority.io";

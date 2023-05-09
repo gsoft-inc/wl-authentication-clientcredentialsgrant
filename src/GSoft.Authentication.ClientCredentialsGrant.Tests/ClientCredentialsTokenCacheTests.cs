@@ -47,7 +47,7 @@ public class ClientCredentialsTokenCacheTests
 
         await this._tokenCache.SetAsync(TestClientName, token, CancellationToken.None);
 
-        object ignored;
+        object? ignored;
         A.CallTo(() => this._tokenSerializer.Serialize(TestClientName, A<ClientCredentialsToken>._)).MustHaveHappenedOnceExactly()
             .Then(A.CallTo(() => this._memoryCache.CreateEntry(TestCacheKey)).MustHaveHappenedOnceExactly())
             .Then(A.CallTo(() => this._distributedCache.SetAsync(TestCacheKey, A<byte[]>._, A<DistributedCacheEntryOptions>._, CancellationToken.None)).MustHaveHappenedOnceExactly());
@@ -63,7 +63,7 @@ public class ClientCredentialsTokenCacheTests
         var actualToken = await this._tokenCache.GetAsync(TestClientName, CancellationToken.None);
         Assert.Null(actualToken);
 
-        object ignored;
+        object? ignored;
         A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
             .Then(A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly());
 
@@ -83,7 +83,7 @@ public class ClientCredentialsTokenCacheTests
         Assert.Equal(expectedToken, actualToken);
         Assert.NotSame(expectedToken, actualToken);
 
-        object ignored;
+        object? ignored;
         A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
             .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly());
 
@@ -104,7 +104,7 @@ public class ClientCredentialsTokenCacheTests
         Assert.Equal(expectedToken, actualToken);
         Assert.NotSame(expectedToken, actualToken);
 
-        object ignored;
+        object? ignored;
         A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
             .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly());
 
@@ -124,7 +124,7 @@ public class ClientCredentialsTokenCacheTests
         Assert.Equal(expectedToken, actualToken);
         Assert.NotSame(expectedToken, actualToken);
 
-        object ignored;
+        object? ignored;
         A.CallTo(() => this._memoryCache.TryGetValue(TestCacheKey, out ignored)).MustHaveHappenedOnceExactly()
             .Then(A.CallTo(() => this._distributedCache.GetAsync(TestCacheKey, CancellationToken.None)).MustHaveHappenedOnceExactly())
             .Then(A.CallTo(() => this._tokenSerializer.Deserialize(TestClientName, A<byte[]>._)).MustHaveHappenedOnceExactly())
