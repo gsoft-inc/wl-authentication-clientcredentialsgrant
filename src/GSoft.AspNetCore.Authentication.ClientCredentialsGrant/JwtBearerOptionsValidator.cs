@@ -12,7 +12,7 @@ internal class JwtBearerOptionsValidator : IValidateOptions<JwtBearerOptions>
         this.AuthScheme = authScheme;
     }
 
-    public ValidateOptionsResult Validate(string name, JwtBearerOptions options)
+    public ValidateOptionsResult Validate(string? name, JwtBearerOptions options)
     {
         var errors = new List<string>();
 

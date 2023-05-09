@@ -12,7 +12,7 @@ public class AuthenticationBuilderExtensionsTests
     [Fact]
     public void GivenAnAuthenticationBuilder_WhenConfigsArePresent_ThenOptionsAreSet()
     {
-        var inMemorySettings = new Dictionary<string, string>
+        var inMemorySettings = new Dictionary<string, string?>
         {
             [$"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Authority"] = "https://identity.local",
             [$"Authentication:Schemes:{ClientCredentialsDefaults.AuthenticationScheme}:Audience"] = "audience",
@@ -22,9 +22,7 @@ public class AuthenticationBuilderExtensionsTests
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
         services.AddSingleton<IConfiguration>(configuration);
 
-        var authenticationBuilder = new AuthenticationBuilder(services);
-
-        authenticationBuilder.AddClientCredentials();
+        services.AddAuthentication().AddClientCredentials();
 
         var sp = services.BuildServiceProvider();
 
@@ -41,9 +39,7 @@ public class AuthenticationBuilderExtensionsTests
         var configuration = new ConfigurationBuilder().Build();
         services.AddSingleton<IConfiguration>(configuration);
 
-        var authenticationBuilder = new AuthenticationBuilder(services);
-
-        authenticationBuilder.AddClientCredentials(option =>
+        services.AddAuthentication().AddClientCredentials(option =>
         {
             option.Authority = "https://identity.local";
             option.Audience = "audience";
@@ -61,7 +57,7 @@ public class AuthenticationBuilderExtensionsTests
     public void GivenAnAuthenticationBuilder_WhenUsingCustomSchema_ThenOptionsAreSet()
     {
         var authScheme = "authScheme";
-        var inMemorySettings = new Dictionary<string, string>
+        var inMemorySettings = new Dictionary<string, string?>
         {
             [$"Authentication:Schemes:{authScheme}:Authority"] = "https://identity.local",
             [$"Authentication:Schemes:{authScheme}:Audience"] = "audience",
@@ -71,9 +67,7 @@ public class AuthenticationBuilderExtensionsTests
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
         services.AddSingleton<IConfiguration>(configuration);
 
-        var authenticationBuilder = new AuthenticationBuilder(services);
-
-        authenticationBuilder.AddClientCredentials(authScheme, _ => { });
+        services.AddAuthentication().AddClientCredentials(authScheme, _ => { });
 
         var sp = services.BuildServiceProvider();
 
@@ -87,7 +81,6 @@ public class AuthenticationBuilderExtensionsTests
     public void GivenAnAuthenticationBuilder_WhenOptionsAreConfigured_ThenOptionsAreSet()
     {
         var services = new ServiceCollection();
-        var authenticationBuilder = new AuthenticationBuilder(services);
 
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme)
@@ -97,7 +90,7 @@ public class AuthenticationBuilderExtensionsTests
                 options.Authority = "https://identity.local";
             });
 
-        authenticationBuilder.AddClientCredentials();
+        services.AddAuthentication().AddClientCredentials();
 
         var sp = services.BuildServiceProvider();
 
@@ -111,10 +104,9 @@ public class AuthenticationBuilderExtensionsTests
     public void GivenAnAuthenticationBuilder_WhenOptionsAreConfiguredWithAnAction_ThenOptionsAreSet()
     {
         var services = new ServiceCollection();
-        var authenticationBuilder = new AuthenticationBuilder(services);
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
 
-        authenticationBuilder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, options =>
+        services.AddAuthentication().AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, options =>
         {
             options.Audience = "audience";
             options.Authority = "https://identity.local";
@@ -135,8 +127,7 @@ public class AuthenticationBuilderExtensionsTests
         var configuration = new ConfigurationBuilder().Build();
         services.AddSingleton<IConfiguration>(configuration);
 
-        var authenticationBuilder = new AuthenticationBuilder(services);
-        authenticationBuilder.AddClientCredentials();
+        services.AddAuthentication().AddClientCredentials();
 
         var sp = services.BuildServiceProvider();
 
