@@ -7,7 +7,7 @@ public class ClientCredentialsAuthorizeAttributeTests
 {
     [Theory]
     [ClassData(typeof(ClientCredentialsScopeData))]
-    public void Given_All_Possible_Scopes_When_Create_Then_Mapped_To_Policy(ClientCredentialsScope scope)
+    public void GivenAllPossibleScopes_WhenCreate_ThenMappedToPolicy(ClientCredentialsScope scope)
     {
         var attribute = new ClientCredentialsAuthorizeAttribute(scope);
         Assert.Equal(scope, attribute.Scope);
@@ -15,7 +15,7 @@ public class ClientCredentialsAuthorizeAttributeTests
     }
 
     [Fact]
-    public void Given_InValid_Scope_When_Create_Then_Map_To_Proper_Policy_Name()
+    public void GivenInValidScope_WhenCreate_ThenMapToProperPolicyName()
     {
         var scope = (ClientCredentialsScope)999;
         Assert.Throws<ArgumentException>(() => new ClientCredentialsAuthorizeAttribute(scope));

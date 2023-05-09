@@ -13,13 +13,13 @@ public class AuthorizationExtensionsTest
     private const string DefaultAuthority = "Https://authority.io";
 
     [Fact]
-    public void GivenNullIServiceCollection_When_AddClientCredentialsAuthorization_Then_ThrowArgumentNullException()
+    public void GivenNullIServiceCollection_WhenAddClientCredentialsAuthorization_ThenThrowArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => AuthorizationExtensions.AddClientCredentialsAuthorization(null!));
     }
 
     [Fact]
-    public async Task Given_IServiceCollection_When_AddClientCredentialsAuthorization_Then_Policies_Set()
+    public async Task GivenIServiceCollection_WhenAddClientCredentialsAuthorization_ThenPoliciesSet()
     {
         // Given
         var services = new ServiceCollection();
