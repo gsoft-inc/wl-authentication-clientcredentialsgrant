@@ -9,9 +9,9 @@ This set of two libraries enables **authenticated machine-to-machine HTTP commun
 HTTP requests are authenticated with JSON web tokens (JWT) **issued by an OAuth 2.0 authorization server** using [the client credentials grant flow](https://www.rfc-editor.org/rfc/rfc6749#section-4.4).
 
 ```
-                            ┌───────────────────────────────┐
-                 ┌─────────►│ OAuth2.0 authorization server │◄───────────┐
-                 │          └───────────────────────────────┘            │
+                            ┌────────────────────────────────┐
+                 ┌─────────►│ OAuth 2.0 authorization server │◄──────────┐
+                 │          └────────────────────────────────┘           │
                  │                                                       │
                  │ get token with                       get signing keys │
                  │ client credentials grant flow                         │ validate
@@ -37,11 +37,16 @@ The **server-side library** includes:
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
 * Support for ASP.NET Core 6.0 and later.
 
+**Requirements and Considerations**:
+
+* Your OAuth 2.0 authorization server **must expose its metadata** at the URL `<AUTHORITY>/.well-known/openid-configuration`, as described in [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html#section-3).
+
+
 ## Getting started
 
 ### Client-side library
 
-Install the package [GSoft.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) in your client-side application
+Install the package [GSoft.Extensions.Http.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) in your client-side application
 that needs to communicate with the protected ASP.NET Core server. Then, use one of the following methods to configure an authenticated `HttpClient`:
 
 ```csharp
@@ -97,9 +102,60 @@ public class MyClient
 _This client-side library is based on [Duende.AccessTokenManagement](https://github.com/DuendeSoftware/Duende.AccessTokenManagement/tree/1.1.0), Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0._
 
 
-### Server side library
+### Server-side library
 
-Documentation coming soon.
+Install the package [GSoft.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
+
+```csharp
+// Registers Microsoft's JwtBearer handler with a default "ClientCredentials" authentication scheme.
+// This authentication scheme can be changed using other methods overloads.
+builder.Services.AddAuthentication().AddClientCredentials();
+```
+
+This will automatically bind the configuration section `Authentication:Schemes:ClientCredentials` (unless you've changed the authentication scheme).
+For instance, the example above works well with this `appsettings.json`:
+
+```json
+{
+  "Authentication": {
+    "Schemes": {
+      "ClientCredentials": {
+        "Authority": "<oauth2_authorization_server_base_url>",
+        "Audience": "<audience>"
+      }
+    }
+  }
+}
+```
+
+Next, register the authorization services:
+
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    // Change the scheme here if you registered a custom scheme in the authentication services.
+    // You can also add requirements to your policy, such as '.RequireClaim("name", "value", ["values"])'.
+    options.AddPolicy("my-policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser());
+});
+```
+
+Finally, register the authentication and authorization middlewares in your ASP.NET Core app and decorate your endpoints with the `AuthorizeAttribute`:
+
+```csharp
+var app = builder.Build();
+// [...]
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Minimal APIs
+app.MapGet("/hello-world", () => "Hello World!").RequireAuthorization("my-policy");
+
+// Controller-style
+[Authorize("my-policy")]
+[HttpGet("hello-world")]
+public IActionResult HelloWorld() => this.Ok("Hello world");
+```
 
 
 ## Building, releasing and versioning
