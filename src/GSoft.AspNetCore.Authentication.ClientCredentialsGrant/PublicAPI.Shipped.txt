@@ -1,5 +1,16 @@
 #nullable enable
+const GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults.AuthenticationScheme = "ClientCredentials" -> string!
+GSoft.AspNetCore.Authentication.ClientCredentialsGrant.ClientCredentialsDefaults
+Microsoft.AspNetCore.Authorization.ClientCredentialsAuthorizeAttribute
+Microsoft.AspNetCore.Authorization.ClientCredentialsAuthorizeAttribute.ClientCredentialsAuthorizeAttribute(Microsoft.AspNetCore.Authorization.ClientCredentialsScope scope) -> void
+Microsoft.AspNetCore.Authorization.ClientCredentialsAuthorizeAttribute.Scope.get -> Microsoft.AspNetCore.Authorization.ClientCredentialsScope
+Microsoft.AspNetCore.Authorization.ClientCredentialsScope
+Microsoft.AspNetCore.Authorization.ClientCredentialsScope.Admin = 2 -> Microsoft.AspNetCore.Authorization.ClientCredentialsScope
+Microsoft.AspNetCore.Authorization.ClientCredentialsScope.Read = 0 -> Microsoft.AspNetCore.Authorization.ClientCredentialsScope
+Microsoft.AspNetCore.Authorization.ClientCredentialsScope.Write = 1 -> Microsoft.AspNetCore.Authorization.ClientCredentialsScope
 Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions
+Microsoft.Extensions.DependencyInjection.AuthorizationExtensions
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, string! authScheme, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
+static Microsoft.Extensions.DependencyInjection.AuthorizationExtensions.AddClientCredentialsAuthorization(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

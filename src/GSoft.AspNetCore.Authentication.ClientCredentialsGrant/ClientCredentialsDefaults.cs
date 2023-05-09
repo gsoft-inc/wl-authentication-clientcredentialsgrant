@@ -1,6 +1,12 @@
-namespace Microsoft.Extensions.DependencyInjection;
+namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 
-internal static class ClientCredentialsDefaults
+public static class ClientCredentialsDefaults
 {
     public const string AuthenticationScheme = "ClientCredentials";
+
+    internal const string AuthorizationReadPolicy = "ClientCredentialsRead";
+
+    internal const string AuthorizationWritePolicy = "ClientCredentialsWrite";
+
+    internal const string AuthorizationAdminPolicy = "ClientCredentialsAdmin";
 }

@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Logging;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class HttpClientBuilderExtensionsTests
 {

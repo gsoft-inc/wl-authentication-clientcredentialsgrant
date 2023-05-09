@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using Duende.IdentityServer.Models;
+using GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -10,10 +12,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Secret = Duende.IdentityServer.Models.Secret;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class IntegrationTests
 {
+    private const string Audience = "invoices";
+
     private readonly ITestOutputHelper _testOutputHelper;
 
     public IntegrationTests(ITestOutputHelper testOutputHelper)
@@ -27,14 +31,14 @@ public class IntegrationTests
         // Define some OAuth 2.0 scopes for fictional invoices access management
         var identityApiScopes = new[]
         {
-            new ApiScope("invoice.read", "Reads your invoices."),
-            new ApiScope("invoice.pay", "Pays your invoices."),
+            new ApiScope($"{Audience}:read", "Reads your invoices."),
+            new ApiScope($"{Audience}:pay", "Pays your invoices."),
         };
 
         // Define the protected resources, here an invoice API (represents something we want to communicate with)
         var identityApiResources = new[]
         {
-            new ApiResource("invoices", "Invoice API") { Scopes = { "invoice.read", "invoice.pay" } },
+            new ApiResource(Audience, "Invoice API") { Scopes = { $"{Audience}:read", $"{Audience}:pay" } },
         };
 
         // Define the OAuth 2.0 clients and the scopes that can be granted
@@ -46,7 +50,7 @@ public class IntegrationTests
                 ClientId = "invoices_read_client",
                 ClientSecrets = new[] { new Secret("invoices_read_client_secret".Sha256()) },
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                AllowedScopes = { "invoice.read" },
+                AllowedScopes = { $"{Audience}:read" },
             },
         };
 
@@ -57,6 +61,7 @@ public class IntegrationTests
         // Here begins services registrations in the dependency injection container
         webAppBuilder.Services.AddLogging(x => x.SetMinimumLevel(LogLevel.Debug).ClearProviders().AddProvider(new XunitLoggerProvider(this._testOutputHelper)));
         webAppBuilder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
+        webAppBuilder.Services.AddSingleton<TestServerHandler>();
         webAppBuilder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
 
         webAppBuilder.Services.AddIdentityServer()
@@ -66,19 +71,15 @@ public class IntegrationTests
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddClientCredentials();
-        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServer>((options, testServer) =>
+        webAppBuilder.Services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme).Configure<TestServerHandler>((options, testServerClient) =>
         {
-            options.Audience = "invoices";
+            options.Audience = Audience;
             options.Authority = "https://identity.local";
-            options.Backchannel = testServer.CreateClient();
+            options.BackchannelHttpHandler = testServerClient;
         });
 
         // This invoice authorization policy must be individually applied to endpoints
-        webAppBuilder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy("invoices_read_policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.read"));
-            options.AddPolicy("invoices_pay_policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser().RequireClaim("scope", "invoice.pay"));
-        });
+        webAppBuilder.Services.AddClientCredentialsAuthorization();
 
         // Change the primary HTTP message handler of this library to communicate with this in-memory test server without accessing the network
         webAppBuilder.Services.AddHttpClient(ClientCredentialsConstants.BackchannelHttpClientName)
@@ -93,7 +94,7 @@ public class IntegrationTests
                 options.Authority = "https://identity.local";
                 options.ClientId = "invoices_read_client";
                 options.ClientSecret = "invoices_read_client_secret";
-                options.Scope = "invoice.read";
+                options.Scope = $"{Audience}:read";
             });
 
         // Here begins ASP.NET Core middleware pipelines registration
@@ -103,8 +104,8 @@ public class IntegrationTests
         webApp.UseAuthorization();
 
         webApp.MapGet("/public", () => "This endpoint is public").RequireHost("invoice-app.local");
-        webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization("invoices_read_policy").RequireHost("invoice-app.local");
-        webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization("invoices_pay_policy").RequireHost("invoice-app.local");
+        webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationReadPolicy).RequireHost("invoice-app.local");
+        webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationWritePolicy).RequireHost("invoice-app.local");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -135,6 +136,56 @@ public class IntegrationTests
         {
             // Shut down the web app
             cts.Cancel();
+        }
+    }
+
+    private sealed class TestServerHandler : DelegatingHandler
+    {
+        private readonly TestServer _testServer;
+        private HttpClient? _testServerClient;
+
+        public TestServerHandler(TestServer testServer)
+        {
+            this._testServer = testServer;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            this._testServerClient ??= this._testServer.CreateClient();
+
+            // Request has to be cloned since it has already gone through the httpclient wrapping this handler even though the request hasn't been sent yet.
+            var cloneRequest = await CloneHttpRequest(request, cancellationToken);
+
+            return await this._testServerClient.SendAsync(cloneRequest, cancellationToken);
+        }
+
+        private static async Task<HttpRequestMessage> CloneHttpRequest(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var cloneRequest = new HttpRequestMessage(request.Method, request.RequestUri);
+            cloneRequest.Version = request.Version;
+
+            foreach (var (key, value) in request.Headers)
+            {
+                cloneRequest.Headers.TryAddWithoutValidation(key, value);
+            }
+
+            foreach (var (key, value) in request.Options)
+            {
+                cloneRequest.Options.TryAdd(key, value);
+            }
+
+            if (request.Content != null)
+            {
+                var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken);
+                cloneRequest.Content = new ByteArrayContent(contentBytes);
+
+                foreach (var (key, value) in request.Content.Headers)
+                {
+                    cloneRequest.Content.Headers.TryAddWithoutValidation(key, value);
+                }
+            }
+
+            return cloneRequest;
         }
     }
 }

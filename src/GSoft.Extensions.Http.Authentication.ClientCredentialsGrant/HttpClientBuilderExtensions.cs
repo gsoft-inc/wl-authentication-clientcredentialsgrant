@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class HttpClientBuilderExtensions
 {

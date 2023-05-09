@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using FakeItEasy;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 // Inspired from Microsoft.Identity.Web caching tests:
 // https://github.com/AzureAD/microsoft-identity-web/blob/2.9.0/tests/Microsoft.Identity.Web.Test/L1L2CacheTests.cs

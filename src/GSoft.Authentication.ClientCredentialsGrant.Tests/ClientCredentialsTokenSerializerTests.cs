@@ -1,9 +1,10 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
 using FakeItEasy;
+using GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.DataProtection;
 
-namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.Tests;
+namespace GSoft.Authentication.ClientCredentialsGrant.Tests;
 
 public class ClientCredentialsTokenSerializerTests
 {
