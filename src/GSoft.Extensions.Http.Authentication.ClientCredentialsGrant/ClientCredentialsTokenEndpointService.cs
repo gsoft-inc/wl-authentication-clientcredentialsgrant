@@ -52,7 +52,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
 
             return new ClientCredentialsToken
             {
-                AccessToken = response.AccessToken,
+                AccessToken = response.AccessToken!,
                 Expiration = response.ExpiresIn == 0 ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
             };
         }
