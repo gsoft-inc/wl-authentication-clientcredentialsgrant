@@ -39,19 +39,19 @@ public static class AuthenticationBuilderExtensions
 
         builder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
 
-        var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsValidateJwtBearerOptionsDescriptor(x, authScheme));
+        var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsDescriptorOfJwtBearerOptionsValidator(x, authScheme));
         if (!tokenHandlerNamedConfigureOptionsAlreadyAdded)
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<JwtBearerOptions>>(new ValidateJwtBearerOptions(authScheme)));
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<JwtBearerOptions>>(new JwtBearerOptionsValidator(authScheme)));
         }
 
         return builder;
     }
 
-    private static bool IsValidateJwtBearerOptionsDescriptor(ServiceDescriptor serviceDescriptor, string name)
+    private static bool IsDescriptorOfJwtBearerOptionsValidator(ServiceDescriptor serviceDescriptor, string name)
     {
         return serviceDescriptor.ServiceType == typeof(IValidateOptions<JwtBearerOptions>)
-               && serviceDescriptor.ImplementationInstance is ValidateJwtBearerOptions configureOptions
+               && serviceDescriptor.ImplementationInstance is JwtBearerOptionsValidator configureOptions
                && configureOptions.AuthScheme == name;
     }
 }

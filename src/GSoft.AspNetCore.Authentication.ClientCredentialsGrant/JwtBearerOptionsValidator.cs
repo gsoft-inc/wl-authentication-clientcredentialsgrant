@@ -3,11 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace GSoft.AspNetCore.Authentication.ClientCredentialsGrant;
 
-internal class ValidateJwtBearerOptions : IValidateOptions<JwtBearerOptions>
+internal class JwtBearerOptionsValidator : IValidateOptions<JwtBearerOptions>
 {
     internal readonly string AuthScheme;
 
-    public ValidateJwtBearerOptions(string authScheme)
+    public JwtBearerOptionsValidator(string authScheme)
     {
         this.AuthScheme = authScheme;
     }
