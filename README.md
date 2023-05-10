@@ -40,6 +40,7 @@ The **server-side library** includes:
 **Requirements and Considerations**:
 
 * Your OAuth 2.0 authorization server **must expose its metadata** at the URL `<AUTHORITY>/.well-known/openid-configuration`, as described in [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html#section-3).
+* The client-side application uses [data protection](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/introduction). It is important to note that your data protection configuration **should support distributed workloads if you have multiple instances of a client application**. [Microsoft recommends using a combination of Azure Key Vault and Azure Storage](https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/configuration/overview) to ensure that data encrypted by an instance of a client application can be read by another instance.
 
 
 ## Getting started
