@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class HttpClientBuilderExtensions
+public static class ClientCredentialsHttpClientBuilderExtensions
 {
     public static IHttpClientBuilder AddClientCredentialsHandler(this IHttpClientBuilder builder, Action<ClientCredentialsOptions>? configure = null)
     {
@@ -41,7 +41,7 @@ public static class HttpClientBuilderExtensions
         var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsTokenHandlerConfigureOptionsServiceDescriptor(x, builder.Name));
         if (!tokenHandlerNamedConfigureOptionsAlreadyAdded)
         {
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HttpClientFactoryOptions>>(new AddClientCredentialsTokenHandlerConfigureOptions(builder.Name)));
+            builder.Services.Add(ServiceDescriptor.Singleton<IConfigureOptions<HttpClientFactoryOptions>>(new AddClientCredentialsTokenHandlerConfigureOptions(builder.Name)));
         }
 
         return builder;
@@ -54,7 +54,7 @@ public static class HttpClientBuilderExtensions
             && configureOptions.Name == name;
     }
 
-    private sealed class AddBackchannelRetryHandlerConfigureOptions : ConfigureNamedOptions<HttpClientFactoryOptions>
+    internal sealed class AddBackchannelRetryHandlerConfigureOptions : ConfigureNamedOptions<HttpClientFactoryOptions>
     {
         public AddBackchannelRetryHandlerConfigureOptions()
             : base(ClientCredentialsConstants.BackchannelHttpClientName, AddBackchannelRetryHandler)
@@ -70,7 +70,7 @@ public static class HttpClientBuilderExtensions
         }
     }
 
-    private sealed class AddClientCredentialsTokenHandlerConfigureOptions : ConfigureNamedOptions<HttpClientFactoryOptions>
+    internal sealed class AddClientCredentialsTokenHandlerConfigureOptions : ConfigureNamedOptions<HttpClientFactoryOptions>
     {
         public AddClientCredentialsTokenHandlerConfigureOptions(string name)
             : base(name, AddClientCredentialsTokenHandler)

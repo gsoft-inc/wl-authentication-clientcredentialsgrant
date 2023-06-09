@@ -46,6 +46,20 @@ public class HttpClientBuilderExtensionsTests
         Assert.IsType<HttpClientHandler>(backchannelHttpMessageHandlers[2]);
     }
 
+    [Fact]
+    public void Calling_AddClientCredentialsHandler_With_Many_Client_Names_Multiple_Times_Only_Adds_One_Configuration_Per_Client_Name()
+    {
+        var services = new ServiceCollection();
+
+        // Call our extension method multiple times with different client names
+        services.AddHttpClient("MyTestApi1").AddClientCredentialsHandler().AddClientCredentialsHandler();
+        services.AddHttpClient("MyTestApi2").AddClientCredentialsHandler().AddClientCredentialsHandler();
+
+        Assert.Single(services, x => x.ImplementationType == typeof(ClientCredentialsHttpClientBuilderExtensions.AddBackchannelRetryHandlerConfigureOptions));
+        Assert.Single(services, x => x.ImplementationInstance is ClientCredentialsHttpClientBuilderExtensions.AddClientCredentialsTokenHandlerConfigureOptions { Name: "MyTestApi1" });
+        Assert.Single(services, x => x.ImplementationInstance is ClientCredentialsHttpClientBuilderExtensions.AddClientCredentialsTokenHandlerConfigureOptions { Name: "MyTestApi2" });
+    }
+
     private static void ConfigureFakeOptions(ClientCredentialsOptions options)
     {
         options.Authority = "https://whatever";
