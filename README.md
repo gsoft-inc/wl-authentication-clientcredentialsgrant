@@ -73,13 +73,18 @@ services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(conf
     "Authority": "<oauth2_authorization_server_base_url>",
     "ClientId": "<oauth2_client_id>",
     "ClientSecret": "<oauth2_client_secret>", // use a secret configuration provider instead of hardcoding the value
-    "Scope": "<optional_requested_scope>", // use "Scopes" for multiple values
+    "Scope": "<optional_requested_scope>", // use "Scopes" for multiple values,
+    "EnforceHttps": "<boolean>", // use EnforceHttps to force all authenticated to be sent via https
   }
 }
 
 // You can also use the generic HttpClient registration with any of these methods:
 services.AddHttpClient<MyClient>().AddClientCredentialsHandler( /* [...] */);
 ```
+
+Note on `EnforceHttps`.
+It is possible to allow http authenticated requests, however, this should be limited to exceptional scenarios.
+It is strongly advised that you always use https for authenticated requests transmitted as the token sent will be in clear.
 
 Then, instantiate the `HttpClient` later on using `IHttpClientFactory` or directly inject it in the constructor if you used the generic registration:
 
