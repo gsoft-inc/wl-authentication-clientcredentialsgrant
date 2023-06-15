@@ -12,6 +12,7 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
     private readonly MockPrimaryHttpMessageHandler _mockPrimaryHttpMessageHandler;
     private readonly HttpClient _clientCredentialsHttpClient;
+    private readonly ClientCredentialsOptions _option;
 
     public ClientCredentialsTokenHttpMessageHandlerTests()
     {
@@ -20,8 +21,8 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
             .Returns(Task.FromResult(new ClientCredentialsToken { AccessToken = TestAccessToken, Expiration = DateTimeOffset.UtcNow }));
 
         this._mockPrimaryHttpMessageHandler = new MockPrimaryHttpMessageHandler();
-
-        var clientCredentialsTokenHandler = new ClientCredentialsTokenHttpMessageHandler(this._tokenManagementService, TestClientName)
+        this._option = new ClientCredentialsOptions();
+        var clientCredentialsTokenHandler = new ClientCredentialsTokenHttpMessageHandler(this._tokenManagementService, TestClientName, this._option)
         {
             InnerHandler = this._mockPrimaryHttpMessageHandler,
         };
@@ -42,6 +43,25 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
 
         A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.PreferCache, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => this._tokenManagementService.GetAccessTokenAsync(TestClientName, CachingBehavior.ForceRefresh, A<CancellationToken>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task Throws_ClientCredentialsException_When_Http_By_Default()
+    {
+        await Assert.ThrowsAsync<ClientCredentialsException>(() => this._clientCredentialsHttpClient.GetStringAsync("http://whatever", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task SendAsync_When_EnforceHttps_False_For_Http_Requests()
+    {
+        this._option.EnforceHttps = false;
+        this._mockPrimaryHttpMessageHandler.ExpectedHttpResponseMessages = new[]
+        {
+            new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Access granted on first try") },
+        };
+
+        var response = await this._clientCredentialsHttpClient.GetAsync("http://whatever", CancellationToken.None);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
