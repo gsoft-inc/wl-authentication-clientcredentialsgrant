@@ -12,7 +12,7 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
     private readonly MockPrimaryHttpMessageHandler _mockPrimaryHttpMessageHandler;
     private readonly HttpClient _clientCredentialsHttpClient;
-    private readonly ClientCredentialsOptions _option;
+    private readonly ClientCredentialsOptions _options;
 
     public ClientCredentialsTokenHttpMessageHandlerTests()
     {
@@ -21,8 +21,8 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
             .Returns(Task.FromResult(new ClientCredentialsToken { AccessToken = TestAccessToken, Expiration = DateTimeOffset.UtcNow }));
 
         this._mockPrimaryHttpMessageHandler = new MockPrimaryHttpMessageHandler();
-        this._option = new ClientCredentialsOptions();
-        var clientCredentialsTokenHandler = new ClientCredentialsTokenHttpMessageHandler(this._tokenManagementService, TestClientName, this._option)
+        this._options = new ClientCredentialsOptions();
+        var clientCredentialsTokenHandler = new ClientCredentialsTokenHttpMessageHandler(this._tokenManagementService, TestClientName, this._options)
         {
             InnerHandler = this._mockPrimaryHttpMessageHandler,
         };
@@ -54,7 +54,7 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
     [Fact]
     public async Task SendAsync_When_EnforceHttps_False_For_Http_Requests()
     {
-        this._option.EnforceHttps = false;
+        this._options.EnforceHttps = false;
         this._mockPrimaryHttpMessageHandler.ExpectedHttpResponseMessages = new[]
         {
             new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Access granted on first try") },
