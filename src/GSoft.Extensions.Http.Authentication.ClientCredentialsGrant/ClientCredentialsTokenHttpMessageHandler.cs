@@ -7,6 +7,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace GSoft.Extensions.Http.Authentication.ClientCredentialsGrant;
@@ -27,17 +28,19 @@ internal sealed class ClientCredentialsTokenHttpMessageHandler : PolicyHttpMessa
 
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
     private readonly string _clientName;
+    private readonly ClientCredentialsOptions _options;
 
-    public ClientCredentialsTokenHttpMessageHandler(IClientCredentialsTokenManagementService tokenManagementService, string clientName)
+    public ClientCredentialsTokenHttpMessageHandler(IClientCredentialsTokenManagementService tokenManagementService, string clientName, ClientCredentialsOptions options)
         : base(RetryUnauthorizedResponseOnceAsyncPolicy)
     {
         this._tokenManagementService = tokenManagementService;
         this._clientName = clientName;
+        this._options = options;
     }
 
     protected override async Task<HttpResponseMessage> SendCoreAsync(HttpRequestMessage request, Context context, CancellationToken cancellationToken)
     {
-        EnsureRequestIsSentOverHttps(request);
+        this.EnsureRequestIsSentOverHttps(request);
 
         // Retry with a new token if the previous attempt was unauthorized
         var cachingBehavior = context.ContainsKey(RetryCountContextKey) ? CachingBehavior.ForceRefresh : CachingBehavior.PreferCache;
@@ -45,9 +48,9 @@ internal sealed class ClientCredentialsTokenHttpMessageHandler : PolicyHttpMessa
         return await base.SendCoreAsync(request, context, cancellationToken).ConfigureAwait(false);
     }
 
-    private static void EnsureRequestIsSentOverHttps(HttpRequestMessage request)
+    private void EnsureRequestIsSentOverHttps(HttpRequestMessage request)
     {
-        if (request.RequestUri is { IsAbsoluteUri: true } requestUri && requestUri.Scheme != "https")
+        if (this._options.EnforceHttps && request.RequestUri is { IsAbsoluteUri: true } requestUri && requestUri.Scheme != "https")
         {
             throw new ClientCredentialsException("Due to security concerns, authenticated requests must be sent over HTTPS");
         }

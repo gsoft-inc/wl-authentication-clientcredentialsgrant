@@ -20,3 +20,5 @@ GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsExc
 GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsException.ClientCredentialsException(string! message, System.Exception? innerException) -> void
 Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExtensions
 static Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExtensions.AddClientCredentialsHandler(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.get -> bool
+GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.set -> void

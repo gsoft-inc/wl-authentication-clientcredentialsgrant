@@ -51,4 +51,9 @@ public sealed class ClientCredentialsOptions
     /// Internal cache key computed by options post-configuration
     /// </summary>
     internal string CacheKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Enforce https for all authenticated requests
+    /// </summary>
+    public bool EnforceHttps { get; set; } = true;
 }
