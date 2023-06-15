@@ -82,9 +82,9 @@ public static class ClientCredentialsHttpClientBuilderExtensions
             options.HttpMessageHandlerBuilderActions.Add(static builder =>
             {
                 var tokenManagementService = builder.Services.GetRequiredService<IClientCredentialsTokenManagementService>();
-                var clientCredentialsOptions = builder.Services.GetRequiredService<IOptionsMonitor<ClientCredentialsOptions>>().Get(builder.Name);
+                var options = builder.Services.GetRequiredService<IOptionsMonitor<ClientCredentialsOptions>>().Get(builder.Name);
 
-                var tokenHandler = new ClientCredentialsTokenHttpMessageHandler(tokenManagementService, builder.Name, clientCredentialsOptions);
+                var tokenHandler = new ClientCredentialsTokenHttpMessageHandler(tokenManagementService, builder.Name, options);
                 builder.AdditionalHandlers.Add(tokenHandler);
             });
         }
