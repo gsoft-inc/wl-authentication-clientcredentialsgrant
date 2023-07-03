@@ -127,7 +127,8 @@ For instance, the example above works well with this `appsettings.json`:
     "Schemes": {
       "ClientCredentials": {
         "Authority": "<oauth2_authorization_server_base_url>",
-        "Audience": "<audience>"
+        "Audience": "<audience>",
+        "MetadataAddress": "<oauth2_authorization_server_metadata_address>"
       }
     }
   }
