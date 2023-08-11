@@ -38,11 +38,6 @@ public static class ClientCredentialsHttpClientBuilderExtensions
         // - We don't want internal identity provider HTTP requests retry count to grow exponentially
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HttpClientFactoryOptions>, AddBackchannelRetryHandlerConfigureOptions>());
 
-        builder.Services.Configure<HttpClientFactoryOptions>(ClientCredentialsConstants.BackchannelHttpClientName, opt =>
-        {
-            // Do your configuration here
-        });
-
         var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsTokenHandlerConfigureOptionsServiceDescriptor(x, builder.Name));
         if (!tokenHandlerNamedConfigureOptionsAlreadyAdded)
         {
