@@ -1,9 +1,9 @@
-# GSoft.Authentication.ClientCredentialsGrant
+# Workleap.Authentication.ClientCredentialsGrant
 
-| Description                                           | Download link                                                                                                                                                                                                      | Build status                                                                                                                                                                                                                                                        |
-|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Client-side library for any .NET application          | [![nuget](https://img.shields.io/nuget/v/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
-| Server-side library for ASP.NET Core web applications | [![nuget](https://img.shields.io/nuget/v/GSoft.AspNetCore.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/)           | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/gsoft-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/gsoft-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
+| Description                                           | Download link                                                                                                                                                                                                      | Build status                                                                                                                                                                                                                                                  |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Client-side library for any .NET application          | [![nuget](https://img.shields.io/nuget/v/Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/Workleap.Extensions.Http.Authentication.ClientCredentialsGrant/) | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/wl-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/wl-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
+| Server-side library for ASP.NET Core web applications | [![nuget](https://img.shields.io/nuget/v/Workleap.AspNetCore.Authentication.ClientCredentialsGrant.svg?logo=nuget)](https://www.nuget.org/packages/Workleap.AspNetCore.Authentication.ClientCredentialsGrant/)           | [![build](https://img.shields.io/github/actions/workflow/status/gsoft-inc/wl-authentication-clientcredentialsgrant/publish.yml?logo=github&branch=main)](https://github.com/gsoft-inc/wl-authentication-clientcredentialsgrant/actions/workflows/publish.yml) |
 
 This set of two libraries enables **authenticated machine-to-machine HTTP communication** between a .NET application and an ASP.NET Core web application.
 HTTP requests are authenticated with JSON web tokens (JWT) **issued by an OAuth 2.0 authorization server** using [the client credentials grant flow](https://www.rfc-editor.org/rfc/rfc6749#section-4.4).
@@ -47,7 +47,7 @@ The **server-side library** includes:
 
 ### Client-side library
 
-Install the package [GSoft.Extensions.Http.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.Extensions.Http.Authentication.ClientCredentialsGrant/) in your client-side application
+Install the package [Workleap.Extensions.Http.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/Workleap.Extensions.Http.Authentication.ClientCredentialsGrant/) in your client-side application
 that needs to communicate with the protected ASP.NET Core server. Then, use one of the following methods to configure an authenticated `HttpClient`:
 
 ```csharp
@@ -110,7 +110,7 @@ _This client-side library is based on [Duende.AccessTokenManagement](https://git
 
 ### Server-side library
 
-Install the package [GSoft.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/GSoft.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
+Install the package [Workleap.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/Workleap.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
 
 ```csharp
 // Registers Microsoft's JwtBearer handler with a default "ClientCredentials" authentication scheme.
@@ -175,4 +175,4 @@ When you are ready to **officially release** a stable NuGet package by following
 
 ## License
 
-Copyright © 2023, GSoft Group Inc. This code is licensed under the Apache License, Version 2.0. You may obtain a copy of this license at https://github.com/gsoft-inc/gsoft-license/blob/master/LICENSE.
+Copyright © 2023, Workleap. This code is licensed under the Apache License, Version 2.0. You may obtain a copy of this license at https://github.com/gsoft-inc/gsoft-license/blob/master/LICENSE.

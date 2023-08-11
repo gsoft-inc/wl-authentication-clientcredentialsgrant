@@ -1,0 +1,24 @@
+#nullable enable
+const Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsConstants.BackchannelHttpClientName = "Workleap.Authentication.ClientCredentialsGrant" -> string!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsConstants
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.get -> string!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Authority.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.CacheLifetimeBuffer.get -> System.TimeSpan
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.CacheLifetimeBuffer.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientCredentialsOptions() -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientId.get -> string!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientId.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientSecret.get -> string!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.ClientSecret.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scope.get -> string!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scope.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scopes.get -> string![]!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.Scopes.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsException
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsException.ClientCredentialsException(string! message) -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsException.ClientCredentialsException(string! message, System.Exception? innerException) -> void
+Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExtensions
+static Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExtensions.AddClientCredentialsHandler(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.get -> bool
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.set -> void
