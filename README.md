@@ -65,7 +65,7 @@ services.AddHttpClient("MyClient").AddClientCredentialsHandler(configuration.Get
 
 // Method 3: Lazily bind the options to a configuration section
 services.AddHttpClient("MyClient").AddClientCredentialsHandler();
-services.AddOptions<ClientCredentialsOptions>("MyClient").BindConfiguration(configSectionPath: "MyConfigSection");
+services.AddOptions<ClientCredentialsOptions>("MyClient").Bind(configuration.GetRequiredSection("MyConfigSection"));
 
 // appsettings.json:
 {
