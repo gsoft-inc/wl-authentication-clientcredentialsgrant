@@ -37,7 +37,7 @@ public static class AuthenticationBuilderExtensions
             configSection.Bind(options);
         });
 
-        builder.AddJwtBearer(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
+        builder.AddJwtBearer(authScheme, configureOptions);
 
         var tokenHandlerNamedConfigureOptionsAlreadyAdded = builder.Services.Any(x => IsDescriptorOfJwtBearerOptionsValidator(x, authScheme));
         if (!tokenHandlerNamedConfigureOptionsAlreadyAdded)
