@@ -134,6 +134,25 @@ public class AuthenticationBuilderExtensionsTests
     }
 
     [Fact]
+    public void GivenAnAuthenticationBuilderWithACustomAuthScheme_WhenAddClientCredentials_ThenAuthSchemeIsSet()
+    {
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+        services.AddSingleton<IConfiguration>(configuration);
+
+        services.AddAuthentication().AddClientCredentials("CustomScheme", options =>
+        {
+            options.Audience = "audience";
+            options.Authority = "https://identity.local";
+        });
+
+        var sp = services.BuildServiceProvider();
+        var jwtBearerOptions = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get("CustomScheme");
+
+        Assert.NotNull(jwtBearerOptions);
+    }
+
+    [Fact]
     public void GivenNoAuthenticationBuilder_WhenCalling_ThrowArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => AuthenticationBuilderExtensions.AddClientCredentials(null!));
