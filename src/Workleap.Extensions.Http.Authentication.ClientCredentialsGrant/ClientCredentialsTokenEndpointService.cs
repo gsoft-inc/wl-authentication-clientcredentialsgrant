@@ -5,6 +5,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Net;
+using System.Text;
 using IdentityModel.Client;
 using Microsoft.Extensions.Options;
 
@@ -71,32 +72,52 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
 
     private static void ThrowOnIdentityModelError(string clientName, TokenResponse response)
     {
-        var exceptionMessagePrefix = $"An error occured while retrieving token for client '{clientName}'";
-
         // Checking this error type first helps us preserve the original exception
         if (response is { ErrorType: ResponseErrorType.Exception, Exception: { } exception })
         {
-            throw new ClientCredentialsException(exceptionMessagePrefix, exception);
+            throw new ClientCredentialsException(GetErrorMessage(clientName, response), exception);
         }
 
         // TokenResponse.IsError and TokenResponse.Error implementations are incomplete but we handle the missing use cases below
         // https://github.com/IdentityModel/IdentityModel/blob/6.0.0/src/Client/Messages/ProtocolResponse.cs#L190
         if (response.IsError)
         {
-            throw new ClientCredentialsException(exceptionMessagePrefix + ": " + response.Error);
+            throw new ClientCredentialsException(GetErrorMessage(clientName, response));
         }
 
         switch (response.ErrorType)
         {
             case ResponseErrorType.Http when response.HttpStatusCode != default:
-                throw new ClientCredentialsException(exceptionMessagePrefix + ": HTTP error " + (int)response.HttpStatusCode);
+                throw new ClientCredentialsException(GetErrorMessage(clientName, response, $"HTTP error {(int)response.HttpStatusCode}"));
             case ResponseErrorType.Protocol:
-                throw new ClientCredentialsException(exceptionMessagePrefix + ": HTTP error " + (int)HttpStatusCode.BadRequest);
+                throw new ClientCredentialsException(GetErrorMessage(clientName, response, $"HTTP error {(int)HttpStatusCode.BadRequest}"));
         }
 
         if (string.IsNullOrEmpty(response.AccessToken))
         {
-            throw new ClientCredentialsException(exceptionMessagePrefix + ": result was empty");
+            throw new ClientCredentialsException(GetErrorMessage(clientName, response, "result was empty"));
         }
+    }
+
+    private static string GetErrorMessage(string clientName, TokenResponse response, params string[] additionalMessageParts)
+    {
+        var exceptionMessagePrefixBuilder = new StringBuilder($"An error occured while retrieving token for client '{clientName}");
+        
+        if (response.Error != null)
+        {
+            exceptionMessagePrefixBuilder.Append($": {response.Error}");
+        }
+        
+        if (response.ErrorDescription != null)
+        {
+            exceptionMessagePrefixBuilder.Append($": {response.ErrorDescription}");
+        }
+
+        foreach (var additionalMessagePart in additionalMessageParts)
+        {
+            exceptionMessagePrefixBuilder.Append($": {additionalMessagePart}");
+        }
+        
+        return exceptionMessagePrefixBuilder.ToString();
     }
 }
