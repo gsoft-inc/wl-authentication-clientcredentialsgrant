@@ -101,7 +101,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
 
     private static string GetErrorMessage(string clientName, TokenResponse response, params string[] additionalMessageParts)
     {
-        var exceptionMessagePrefixBuilder = new StringBuilder($"An error occured while retrieving token for client '{clientName}");
+        var exceptionMessagePrefixBuilder = new StringBuilder($"An error occurred while retrieving token for client '{clientName}'");
         
         if (response.Error != null)
         {
