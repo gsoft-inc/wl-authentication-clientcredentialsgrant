@@ -99,7 +99,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
         }
     }
 
-    private static string GetErrorMessage(string clientName, TokenResponse response, params string[] additionalMessageParts)
+    private static string GetErrorMessage(string clientName, TokenResponse response, string? additionalMessagePart = null)
     {
         var exceptionMessagePrefixBuilder = new StringBuilder($"An error occurred while retrieving token for client '{clientName}'");
         
@@ -113,7 +113,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
             exceptionMessagePrefixBuilder.Append($": {response.ErrorDescription}");
         }
 
-        foreach (var additionalMessagePart in additionalMessageParts)
+        if (additionalMessagePart != null)
         {
             exceptionMessagePrefixBuilder.Append($": {additionalMessagePart}");
         }
