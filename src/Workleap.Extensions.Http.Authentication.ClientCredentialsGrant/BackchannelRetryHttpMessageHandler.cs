@@ -3,6 +3,7 @@ using Microsoft.Extensions.Http;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
+using Polly.Retry;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 
@@ -21,7 +22,7 @@ internal sealed class BackchannelRetryHttpMessageHandler : PolicyHttpMessageHand
 
     // Microsoft documentation about resilient HTTP requests and production-grade retry jitter strategy:
     // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly#add-a-jitter-strategy-to-the-retry-policy
-    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
     {
         var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 3);
 
