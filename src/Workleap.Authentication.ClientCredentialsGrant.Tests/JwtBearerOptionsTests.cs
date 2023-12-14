@@ -33,7 +33,7 @@ public class JwtBearerOptionsTests
 
     [Theory]
     [InlineData("authority")]
-    [InlineData("http://authority.io")]
+    [InlineData("http://authority")]
     public void Given_JwtBearerOptions_With_Http_Authority_When_GetOptions_Then_Throws(string authority)
     {
         var services = new ServiceCollection();
@@ -57,13 +57,40 @@ public class JwtBearerOptionsTests
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         services.AddAuthentication().AddJwtBearer("OtherScheme", opt =>
         {
-            opt.Authority = "https://authority.io";
+            opt.Authority = "https://authority";
         });
 
         using var serviceProvider = services.BuildServiceProvider();
         var optionsSnapshot = serviceProvider.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>();
 
         _ = optionsSnapshot.Get("OtherScheme");
+    }
+
+    [Fact]
+    public void Given_Valid_JwtBearerOptions_Options_Are_Set_Correctly()
+    {
+        var services = new ServiceCollection();
+        var configurationBuilder = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Authentication:Schemes:ClientCredentials:Audience"] = "audience",
+        });
+        services.AddSingleton<IConfiguration>(configurationBuilder.Build());
+        services.AddAuthentication().AddClientCredentials(opt =>
+        {
+            opt.Authority = "https://authority";
+        });
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var optionsSnapshot = serviceProvider.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>();
+
+        var options = optionsSnapshot.Get(ClientCredentialsDefaults.AuthenticationScheme);
+
+        Assert.Equal("https://authority", options.Authority);
+        Assert.Equal("audience", options.Audience);
+        Assert.Equal(ClientCredentialsDefaults.AuthenticationType, options.TokenValidationParameters.AuthenticationType);
+        Assert.Equal("audience", options.TokenValidationParameters.ValidAudience);
+        Assert.True(options.TokenValidationParameters.ValidateAudience);
+        Assert.True(options.TokenValidationParameters.ValidateIssuer);
     }
 
     public static IEnumerable<object[]> CreateTestCases()

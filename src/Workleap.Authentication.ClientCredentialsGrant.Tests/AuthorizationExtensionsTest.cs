@@ -10,7 +10,7 @@ namespace Workleap.Authentication.ClientCredentialsGrant.Tests;
 public class AuthorizationExtensionsTest
 {
     private const string DefaultAudience = "serviceA";
-    private const string DefaultAuthority = "Https://authority.io";
+    private const string DefaultAuthority = "https://authority";
 
     [Fact]
     public void GivenNullIServiceCollection_WhenAddClientCredentialsAuthorization_ThenThrowArgumentNullException()

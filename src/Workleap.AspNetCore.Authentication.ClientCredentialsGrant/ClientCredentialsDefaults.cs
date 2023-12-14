@@ -4,6 +4,8 @@ public static class ClientCredentialsDefaults
 {
     public const string AuthenticationScheme = "ClientCredentials";
 
+    internal const string AuthenticationType = "ClientCredentials";
+
     internal const string AuthorizationReadPolicy = "ClientCredentialsRead";
 
     internal const string AuthorizationWritePolicy = "ClientCredentialsWrite";
