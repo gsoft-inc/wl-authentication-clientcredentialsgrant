@@ -37,6 +37,14 @@
     {
       "matchManagers": ["github-actions"],
       "groupName": "Pipeline dependencies"
+    },
+    {
+      "matchManagers": ["nuget"],
+      "matchPackageNames": ["Duende.IdentityServer"],
+      "groupName": "Duende.IdentityServer",
+      "description": "Only stay at v6 to keep support of .NET 6",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
