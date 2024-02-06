@@ -17,10 +17,7 @@ public static class AuthorizationExtensions
 
     public static IServiceCollection AddClientCredentialsAuthorization(this IServiceCollection services)
     {
-        if (services == null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
 
         services.AddAuthorization();
         services.AddOptions<AuthorizationOptions>()

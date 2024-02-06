@@ -8,6 +8,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
+    <AnalysisLevel>latest-All</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 

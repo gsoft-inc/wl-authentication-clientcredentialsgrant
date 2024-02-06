@@ -135,7 +135,9 @@ public class IntegrationTests
         finally
         {
             // Shut down the web app
+#pragma warning disable CA1849 // Given that we are using .Net6/7/8, updating the method to CancelAsync would break backwards compatibility
             cts.Cancel();
+#pragma warning restore CA1849
         }
     }
 
