@@ -14,6 +14,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-dotnet@v4 # Install version declared in global.json
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
