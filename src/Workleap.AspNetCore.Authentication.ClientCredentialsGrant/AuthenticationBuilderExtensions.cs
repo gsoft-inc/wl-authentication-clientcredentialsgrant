@@ -32,6 +32,10 @@ public static class AuthenticationBuilderExtensions
             }
 
             configSection.Bind(options);
+
+            // The default interval is 5 minutes which caused a lot of traffic to the authority server.
+            // Users still have the possibility to overwrite this value in their services.
+            options.RefreshInterval = TimeSpan.FromHours(12);
         });
 
         builder.AddJwtBearer(authScheme, configureOptions);
