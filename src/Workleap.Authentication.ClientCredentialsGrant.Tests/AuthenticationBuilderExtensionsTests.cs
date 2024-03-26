@@ -29,7 +29,6 @@ public class AuthenticationBuilderExtensionsTests
 
         Assert.Equal("audience", jwtBearerOptions.Audience);
         Assert.Equal("https://identity.local", jwtBearerOptions.Authority);
-        Assert.Equal(TimeSpan.FromHours(12), jwtBearerOptions.RefreshInterval);
     }
 
     [Fact]
@@ -43,7 +42,6 @@ public class AuthenticationBuilderExtensionsTests
         {
             option.Authority = "https://identity.local";
             option.Audience = "audience";
-            option.RefreshInterval = TimeSpan.FromMinutes(45);
         });
 
         var sp = services.BuildServiceProvider();
@@ -52,7 +50,6 @@ public class AuthenticationBuilderExtensionsTests
 
         Assert.Equal("audience", jwtBearerOptions.Audience);
         Assert.Equal("https://identity.local", jwtBearerOptions.Authority);
-        Assert.Equal(TimeSpan.FromMinutes(45), jwtBearerOptions.RefreshInterval);
     }
 
     [Fact]
