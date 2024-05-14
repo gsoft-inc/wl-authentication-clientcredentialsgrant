@@ -72,25 +72,9 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
 
     private static void ThrowOnIdentityModelError(string clientName, TokenResponse response)
     {
-        // Checking this error type first helps us preserve the original exception
-        if (response is { ErrorType: ResponseErrorType.Exception, Exception: { } exception })
-        {
-            throw new ClientCredentialsException(GetErrorMessage(clientName, response), exception);
-        }
-
-        // TokenResponse.IsError and TokenResponse.Error implementations are incomplete but we handle the missing use cases below
-        // https://github.com/IdentityModel/IdentityModel/blob/6.0.0/src/Client/Messages/ProtocolResponse.cs#L190
         if (response.IsError)
         {
-            throw new ClientCredentialsException(GetErrorMessage(clientName, response));
-        }
-
-        switch (response.ErrorType)
-        {
-            case ResponseErrorType.Http when response.HttpStatusCode != default:
-                throw new ClientCredentialsException(GetErrorMessage(clientName, response, $"HTTP error {(int)response.HttpStatusCode}"));
-            case ResponseErrorType.Protocol:
-                throw new ClientCredentialsException(GetErrorMessage(clientName, response, $"HTTP error {(int)HttpStatusCode.BadRequest}"));
+            throw new ClientCredentialsException(GetErrorMessage(clientName, response), response.Exception);
         }
 
         if (string.IsNullOrEmpty(response.AccessToken))
@@ -102,12 +86,12 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
     private static string GetErrorMessage(string clientName, TokenResponse response, string? additionalMessagePart = null)
     {
         var exceptionMessagePrefixBuilder = new StringBuilder($"An error occurred while retrieving token for client '{clientName}'");
-        
+
         if (response.Error != null)
         {
             exceptionMessagePrefixBuilder.Append($": {response.Error}");
         }
-        
+
         if (response.ErrorDescription != null)
         {
             exceptionMessagePrefixBuilder.Append($": {response.ErrorDescription}");
@@ -117,7 +101,7 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
         {
             exceptionMessagePrefixBuilder.Append($": {additionalMessagePart}");
         }
-        
+
         return exceptionMessagePrefixBuilder.ToString();
     }
 }
