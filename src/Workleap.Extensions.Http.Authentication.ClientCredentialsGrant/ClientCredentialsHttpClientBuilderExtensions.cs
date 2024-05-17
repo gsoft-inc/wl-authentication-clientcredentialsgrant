@@ -1,5 +1,6 @@
 ﻿using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
@@ -43,6 +44,13 @@ public static class ClientCredentialsHttpClientBuilderExtensions
         {
             builder.Services.Add(ServiceDescriptor.Singleton<IConfigureOptions<HttpClientFactoryOptions>>(new AddClientCredentialsTokenHandlerConfigureOptions(builder.Name)));
         }
+
+        builder.Services.Configure<CacheTokenOnStartupBackgroundServiceOptions>(options =>
+        {
+            options.ClientCredentialPoweredClientNames.Add(builder.Name);
+        });
+
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, CacheTokenOnStartupBackgroundService>());
 
         return builder;
     }

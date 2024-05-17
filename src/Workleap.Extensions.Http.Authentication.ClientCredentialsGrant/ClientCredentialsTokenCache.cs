@@ -35,19 +35,21 @@ internal sealed class ClientCredentialsTokenCache : IClientCredentialsTokenCache
         this._optionsMonitor = optionsMonitor;
     }
 
-    public async Task SetAsync(string clientName, ClientCredentialsToken token, CancellationToken cancellationToken)
+    public async Task<DateTimeOffset> SetAsync(string clientName, ClientCredentialsToken token, CancellationToken cancellationToken)
     {
         var options = this._optionsMonitor.Get(clientName);
 
         var tokenBytes = this._tokenSerializer.Serialize(clientName, token);
-        var absoluteExpiration = token.Expiration.Subtract(options.CacheLifetimeBuffer);
+        var cacheEvictionTime = token.Expiration.Subtract(options.CacheLifetimeBuffer);
 
         // Store token in L1 first
-        this._memoryCache.Set(options.CacheKey, tokenBytes, new MemoryCacheEntryOptions { AbsoluteExpiration = absoluteExpiration });
+        this._memoryCache.Set(options.CacheKey, tokenBytes, new MemoryCacheEntryOptions { AbsoluteExpiration = cacheEvictionTime });
 
         // Then store token in L2
-        var distributedCacheOptions = new DistributedCacheEntryOptions { AbsoluteExpiration = absoluteExpiration };
+        var distributedCacheOptions = new DistributedCacheEntryOptions { AbsoluteExpiration = cacheEvictionTime };
         await this._distributedCache.SetAsync(options.CacheKey, tokenBytes, distributedCacheOptions, cancellationToken).ConfigureAwait(false);
+
+        return cacheEvictionTime;
     }
 
     public async Task<ClientCredentialsToken?> GetAsync(string clientName, CancellationToken cancellationToken)
