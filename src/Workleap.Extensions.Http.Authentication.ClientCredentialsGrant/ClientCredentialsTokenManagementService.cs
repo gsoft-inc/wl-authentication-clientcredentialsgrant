@@ -20,6 +20,8 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     private readonly IClientCredentialsTokenCache _tokenCache;
     private readonly CancellationToken _backgroundRefreshCancellationToken;
 
+    private long _backgroundRefreshedTokenCount;
+
     public ClientCredentialsTokenManagementService(
         IClientCredentialsTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenCache tokenCache,
@@ -34,6 +36,9 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         // If the application is not using a .NET generic host, the application lifetime will be null
         this._backgroundRefreshCancellationToken = applicationLifetime?.ApplicationStopping ?? CancellationToken.None;
     }
+
+    // Used for integration testing only
+    internal long BackgroundRefreshedTokenCount => this._backgroundRefreshedTokenCount;
 
     public async Task<ClientCredentialsToken> GetAccessTokenAsync(string clientName, CachingBehavior cachingBehavior, CancellationToken cancellationToken)
     {
@@ -87,6 +92,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         {
             // We don't care about the token, we just want to refresh it in the background and have it cached
             _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+            Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
         }
         catch (OperationCanceledException) when (this._backgroundRefreshCancellationToken.IsCancellationRequested)
         {

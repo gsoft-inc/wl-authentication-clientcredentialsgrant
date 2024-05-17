@@ -30,7 +30,8 @@ public static class ClientCredentialsHttpClientBuilderExtensions
 
         builder.Services.TryAddSingleton<IClientCredentialsTokenCache, ClientCredentialsTokenCache>();
         builder.Services.TryAddSingleton<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
-        builder.Services.TryAddSingleton<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
+        builder.Services.TryAddSingleton<ClientCredentialsTokenManagementService>();
+        builder.Services.TryAddSingleton<IClientCredentialsTokenManagementService>(x => x.GetRequiredService<ClientCredentialsTokenManagementService>());
         builder.Services.TryAddSingleton<IOpenIdConfigurationRetriever, OpenIdConfigurationRetrieverWithCache>();
         builder.Services.TryAddSingleton<IClientCredentialsTokenSerializer, ClientCredentialsTokenSerializer>();
 
