@@ -50,7 +50,9 @@ public static class ClientCredentialsHttpClientBuilderExtensions
             options.ClientCredentialPoweredClientNames.Add(builder.Name);
         });
 
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, CacheTokenOnStartupBackgroundService>());
+        // This background service is directly accessed in integration tests to ensure the token is cached on startup
+        builder.Services.TryAddSingleton<CacheTokenOnStartupBackgroundService>();
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, CacheTokenOnStartupBackgroundService>(x => x.GetRequiredService<CacheTokenOnStartupBackgroundService>()));
 
         return builder;
     }

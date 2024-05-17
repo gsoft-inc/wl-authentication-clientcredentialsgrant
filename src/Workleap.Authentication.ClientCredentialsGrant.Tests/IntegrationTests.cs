@@ -114,6 +114,16 @@ public class IntegrationTests
             // Start the web app without blocking, the cancellation token source will make sure it will be shutdown if something wrong happens
             _ = webApp.RunAsync(cts.Token);
 
+            try
+            {
+                var cachingBackgroundService = webApp.Services.GetRequiredService<CacheTokenOnStartupBackgroundService>();
+                await cachingBackgroundService.WaitForTokenCachingToCompleteAsync(cts.Token);
+            }
+            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+            {
+                throw new TimeoutException($"{nameof(CacheTokenOnStartupBackgroundService)} didn't complete its job in time");
+            }
+
             var invoicesReadHttpClient = webApp.Services.GetRequiredService<IHttpClientFactory>().CreateClient("invoices_read_http_client");
 
             // Consuming an anonymous/public endpoint should work
