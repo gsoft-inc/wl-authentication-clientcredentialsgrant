@@ -23,7 +23,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     public ClientCredentialsTokenManagementService(
         IClientCredentialsTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenCache tokenCache,
-        IHostApplicationLifetime? applicationLifetime)
+        IHostApplicationLifetime? applicationLifetime = null)
     {
         // .NET named options are case sensitive (https://learn.microsoft.com/en-us/dotnet/core/extensions/options#named-options-support-using-iconfigurenamedoptions)
         this._lazyGetNewTokenTasks = new ConcurrentDictionary<string, Lazy<Task<ClientCredentialsToken>>>(StringComparer.Ordinal);
