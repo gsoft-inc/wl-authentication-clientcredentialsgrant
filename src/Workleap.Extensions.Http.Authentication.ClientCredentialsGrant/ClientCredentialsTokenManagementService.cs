@@ -78,7 +78,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
             const double backgroundRefreshDelayFactor = 0.8;
             var delayBeforeNextBackgroundRefresh = TimeSpan.FromTicks((long)Math.Round(cacheDuration.Ticks * backgroundRefreshDelayFactor));
 
-            _ = this.ScheduleTokenBackgroundRefreshAsync(clientName, delayBeforeNextBackgroundRefresh);
+            this.ScheduleTokenBackgroundRefreshAsync(clientName, delayBeforeNextBackgroundRefresh).Forget();
         }
 
         return newToken;

@@ -121,7 +121,7 @@ public class IntegrationTests
         try
         {
             // Start the web app without blocking, the cancellation token source will make sure it will be shutdown if something wrong happens
-            _ = webApp.RunAsync(cts.Token);
+            webApp.RunAsync(cts.Token).Forget();
 
             try
             {
@@ -159,7 +159,7 @@ public class IntegrationTests
             var unsecuredException = await Assert.ThrowsAsync<ClientCredentialsException>(() => invoicesReadHttpClient.GetStringAsync("http://invoice-app.local/public", cts.Token));
             Assert.Equal("Due to security concerns, authenticated requests must be sent over HTTPS", unsecuredException.Message);
 
-            // Ensure the token is the same than the one we got after the background caching
+            // Ensure the token is the same than the one we got after the background caching as it should still be valid
             var tokenAfterAuthenticatedRequest = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
             Assert.NotNull(tokenAfterAuthenticatedRequest);
             Assert.Equal(tokenAfterStartupBackgroundCaching, tokenAfterAuthenticatedRequest);
@@ -170,7 +170,7 @@ public class IntegrationTests
             await Task.Delay(tokenAfterAuthenticatedRequest.Expiration - DateTimeOffset.UtcNow, cts.Token);
 
             // At this point we're not making any new authenticated HTTP request,
-            // but there should be a background refresh task that should have retrieved a new token for us and it's not the same as the one we got after the background caching
+            // but a background task should have refreshed the token, which should differ from the initially cached one
             Assert.Equal(1, tokenManagementService.BackgroundRefreshedTokenCount);
             var tokenAfterFirstBackgroundRefresh = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
             Assert.NotNull(tokenAfterFirstBackgroundRefresh);

@@ -8,7 +8,7 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
     private readonly IOptions<CacheTokenOnStartupBackgroundServiceOptions> _backgroundServiceOptions;
-    private readonly SemaphoreSlim _allTokensCachedSignal;
+    private readonly TaskCompletionSource<bool> _allTokensCachedSignal;
     private readonly List<string> _clientNames;
 
     private CancellationTokenRegistration? _applicationStartedRegistration;
@@ -22,7 +22,7 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
         this._applicationLifetime = applicationLifetime;
         this._tokenManagementService = tokenManagementService;
         this._backgroundServiceOptions = backgroundServiceOptions;
-        this._allTokensCachedSignal = new SemaphoreSlim(initialCount: 0, maxCount: 1);
+        this._allTokensCachedSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         this._clientNames = new List<string>();
     }
 
@@ -34,8 +34,8 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
         {
             foreach (var clientName in this._clientNames)
             {
-                // We don't await this task because we want to cache all tokens in parallel (fire and forget)
-                _ = this.CacheTokenAsync(clientName, stoppingToken);
+                // We don't await this task because we want to cache all tokens in parallel
+                this.CacheTokenAsync(clientName, stoppingToken).Forget();
             }
         });
 
@@ -50,28 +50,31 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
 
             if (Interlocked.Increment(ref this._successfulCachedTokenCount) == this._clientNames.Count)
             {
-                this._allTokensCachedSignal.Release();
+                this._allTokensCachedSignal.SetResult(true);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Expected when the application is shutting down
+            this._allTokensCachedSignal.TrySetCanceled(cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
             // We did our best to cache the token on startup. It will be retried when an HttpClient will attempt to make authenticated requests.
+            this._allTokensCachedSignal.TrySetException(ex);
         }
     }
 
     // This is meant to be used for integration tests only
     internal async Task WaitForTokenCachingToCompleteAsync(CancellationToken cancellationToken)
     {
-        await this._allTokensCachedSignal.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var timeoutTask = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        var completedTask = await Task.WhenAny(this._allTokensCachedSignal.Task, timeoutTask).ConfigureAwait(false);
+        await completedTask.ConfigureAwait(false);
     }
 
     public override void Dispose()
     {
-        this._allTokensCachedSignal.Dispose();
         this._applicationStartedRegistration?.Dispose();
 
         base.Dispose();
