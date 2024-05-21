@@ -8,6 +8,7 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
     private readonly IOptions<CacheTokenOnStartupBackgroundServiceOptions> _backgroundServiceOptions;
+    private readonly IOptionsMonitor<ClientCredentialsOptions> _clientCredentialsOptionsMonitor;
     private readonly TaskCompletionSource<bool> _allTokensCachedSignal;
     private readonly List<string> _clientNames;
 
@@ -17,11 +18,13 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
     public CacheTokenOnStartupBackgroundService(
         IHostApplicationLifetime applicationLifetime,
         IClientCredentialsTokenManagementService tokenManagementService,
-        IOptions<CacheTokenOnStartupBackgroundServiceOptions> backgroundServiceOptions)
+        IOptions<CacheTokenOnStartupBackgroundServiceOptions> backgroundServiceOptions,
+        IOptionsMonitor<ClientCredentialsOptions> clientCredentialsOptionsMonitor)
     {
         this._applicationLifetime = applicationLifetime;
         this._tokenManagementService = tokenManagementService;
         this._backgroundServiceOptions = backgroundServiceOptions;
+        this._clientCredentialsOptionsMonitor = clientCredentialsOptionsMonitor;
         this._allTokensCachedSignal = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         this._clientNames = new List<string>();
     }
@@ -46,6 +49,12 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
     {
         try
         {
+            var options = this._clientCredentialsOptionsMonitor.Get(clientName);
+            if (!options.EnablePeriodicTokenBackgroundRefresh)
+            {
+                return;
+            }
+
             _ = await this._tokenManagementService.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, cancellationToken).ConfigureAwait(false);
 
             if (Interlocked.Increment(ref this._successfulCachedTokenCount) == this._clientNames.Count)

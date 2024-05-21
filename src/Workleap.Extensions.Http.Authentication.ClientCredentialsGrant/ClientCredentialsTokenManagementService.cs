@@ -6,6 +6,7 @@
 
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 
@@ -18,6 +19,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     private readonly ConcurrentDictionary<string, Lazy<Task<ClientCredentialsToken>>> _lazyGetNewTokenTasks;
     private readonly IClientCredentialsTokenEndpointService _tokenEndpointService;
     private readonly IClientCredentialsTokenCache _tokenCache;
+    private readonly IOptionsMonitor<ClientCredentialsOptions> _optionsMonitor;
     private readonly CancellationToken _backgroundRefreshCancellationToken;
 
     private long _backgroundRefreshedTokenCount;
@@ -25,6 +27,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     public ClientCredentialsTokenManagementService(
         IClientCredentialsTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenCache tokenCache,
+        IOptionsMonitor<ClientCredentialsOptions> optionsMonitor,
         IHostApplicationLifetime? applicationLifetime = null)
     {
         // .NET named options are case sensitive (https://learn.microsoft.com/en-us/dotnet/core/extensions/options#named-options-support-using-iconfigurenamedoptions)
@@ -32,6 +35,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
 
         this._tokenEndpointService = tokenEndpointService;
         this._tokenCache = tokenCache;
+        this._optionsMonitor = optionsMonitor;
 
         // If the application is not using a .NET generic host, the application lifetime will be null
         this._backgroundRefreshCancellationToken = applicationLifetime?.ApplicationStopping ?? CancellationToken.None;
@@ -71,8 +75,14 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         var newToken = await this._tokenEndpointService.RequestTokenAsync(clientName, cancellationToken).ConfigureAwait(false);
 
         var cacheEvictionTime = await this._tokenCache.SetAsync(clientName, newToken, cancellationToken).ConfigureAwait(false);
-        var cacheDuration = cacheEvictionTime - DateTimeOffset.UtcNow;
 
+        var options = this._optionsMonitor.Get(clientName);
+        if (!options.EnablePeriodicTokenBackgroundRefresh)
+        {
+            return newToken;
+        }
+
+        var cacheDuration = cacheEvictionTime - DateTimeOffset.UtcNow;
         if (cacheDuration > TimeSpan.Zero)
         {
             const double backgroundRefreshDelayFactor = 0.8;
