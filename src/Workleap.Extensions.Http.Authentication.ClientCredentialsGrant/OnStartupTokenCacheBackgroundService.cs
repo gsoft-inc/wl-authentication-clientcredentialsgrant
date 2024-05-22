@@ -3,22 +3,22 @@ using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 
-internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
+internal sealed class OnStartupTokenCacheBackgroundService : BackgroundService
 {
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
-    private readonly IOptions<CacheTokenOnStartupBackgroundServiceOptions> _backgroundServiceOptions;
+    private readonly IOptions<OnStartupTokenCacheBackgroundServiceOptions> _backgroundServiceOptions;
     private readonly IOptionsMonitor<ClientCredentialsOptions> _clientCredentialsOptionsMonitor;
     private readonly TaskCompletionSource<bool> _allTokensCachedSignal;
     private readonly List<string> _clientNames;
 
     private CancellationTokenRegistration? _applicationStartedRegistration;
-    private int _successfulCachedTokenCount;
+    private int _successfullyCachedTokenCount;
 
-    public CacheTokenOnStartupBackgroundService(
+    public OnStartupTokenCacheBackgroundService(
         IHostApplicationLifetime applicationLifetime,
         IClientCredentialsTokenManagementService tokenManagementService,
-        IOptions<CacheTokenOnStartupBackgroundServiceOptions> backgroundServiceOptions,
+        IOptions<OnStartupTokenCacheBackgroundServiceOptions> backgroundServiceOptions,
         IOptionsMonitor<ClientCredentialsOptions> clientCredentialsOptionsMonitor)
     {
         this._applicationLifetime = applicationLifetime;
@@ -31,7 +31,14 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this._clientNames.AddRange(this._backgroundServiceOptions.Value.ClientCredentialPoweredClientNames);
+        foreach (var clientName in this._backgroundServiceOptions.Value.ClientCredentialsPoweredClientNames)
+        {
+            var options = this._clientCredentialsOptionsMonitor.Get(clientName);
+            if (options.EnablePeriodicTokenBackgroundRefresh)
+            {
+                this._clientNames.Add(clientName);
+            }
+        }
 
         this._applicationStartedRegistration = this._applicationLifetime.ApplicationStarted.Register(() =>
         {
@@ -57,7 +64,7 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
 
             _ = await this._tokenManagementService.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, cancellationToken).ConfigureAwait(false);
 
-            if (Interlocked.Increment(ref this._successfulCachedTokenCount) == this._clientNames.Count)
+            if (Interlocked.Increment(ref this._successfullyCachedTokenCount) == this._clientNames.Count)
             {
                 this._allTokensCachedSignal.SetResult(true);
             }
@@ -77,9 +84,12 @@ internal sealed class CacheTokenOnStartupBackgroundService : BackgroundService
     // This is meant to be used for integration tests only
     internal async Task WaitForTokenCachingToCompleteAsync(CancellationToken cancellationToken)
     {
-        var timeoutTask = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-        var completedTask = await Task.WhenAny(this._allTokensCachedSignal.Task, timeoutTask).ConfigureAwait(false);
-        await completedTask.ConfigureAwait(false);
+        if (this._clientNames.Count > 0)
+        {
+            var timeoutTask = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            var completedTask = await Task.WhenAny(this._allTokensCachedSignal.Task, timeoutTask).ConfigureAwait(false);
+            await completedTask.ConfigureAwait(false);
+        }
     }
 
     public override void Dispose()

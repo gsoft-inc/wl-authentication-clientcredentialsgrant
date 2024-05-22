@@ -126,12 +126,12 @@ public class IntegrationTests
             try
             {
                 // Ensure that registered clients get cached tokens on app startup
-                var cachingBackgroundService = webApp.Services.GetRequiredService<CacheTokenOnStartupBackgroundService>();
+                var cachingBackgroundService = webApp.Services.GetRequiredService<OnStartupTokenCacheBackgroundService>();
                 await cachingBackgroundService.WaitForTokenCachingToCompleteAsync(cts.Token);
             }
             catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
             {
-                throw new TimeoutException($"{nameof(CacheTokenOnStartupBackgroundService)} didn't complete its job in time");
+                throw new TimeoutException($"{nameof(OnStartupTokenCacheBackgroundService)} didn't complete its job in time");
             }
 
             // Retrieve the access token from the cache for later comparison
