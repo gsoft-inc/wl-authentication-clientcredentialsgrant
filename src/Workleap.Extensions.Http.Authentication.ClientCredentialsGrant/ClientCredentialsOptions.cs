@@ -56,4 +56,11 @@ public sealed class ClientCredentialsOptions
     /// Enforce https for all authenticated requests
     /// </summary>
     public bool EnforceHttps { get; set; } = true;
+
+    /// <summary>
+    /// When set to true, the library will attempt to acquire a token on app startup,
+    /// then refresh the token in the background prior to its cache eviction,
+    /// in order to have a valid token available when needed.
+    /// </summary>
+    public bool EnablePeriodicTokenBackgroundRefresh { get; set; } = true;
 }

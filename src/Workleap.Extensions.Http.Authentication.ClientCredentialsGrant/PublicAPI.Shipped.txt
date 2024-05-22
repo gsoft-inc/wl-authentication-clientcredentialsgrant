@@ -22,3 +22,5 @@ Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExten
 static Microsoft.Extensions.DependencyInjection.ClientCredentialsHttpClientBuilderExtensions.AddClientCredentialsHandler(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
 Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.get -> bool
 Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnforceHttps.set -> void
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnablePeriodicTokenBackgroundRefresh.get -> bool
+Workleap.Extensions.Http.Authentication.ClientCredentialsGrant.ClientCredentialsOptions.EnablePeriodicTokenBackgroundRefresh.set -> void

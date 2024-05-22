@@ -105,6 +105,10 @@ public class MyClient
 }
 ```
 
+Starting from version 1.3.0, tokens are pre-fetched and cached at app startup.
+Subsequently, there is a periodic refresh of the token before its expiration and cache eviction.
+This behavior can be disabled by setting `ClientCredentialsOptions.EnablePeriodicTokenBackgroundRefresh` to `false`.
+
 _This client-side library is based on [Duende.AccessTokenManagement](https://github.com/DuendeSoftware/Duende.AccessTokenManagement/tree/1.1.0), Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0._
 
 
