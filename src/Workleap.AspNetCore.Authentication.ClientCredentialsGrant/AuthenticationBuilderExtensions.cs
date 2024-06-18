@@ -19,6 +19,9 @@ public static class AuthenticationBuilderExtensions
     public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder, Action<JwtBearerOptions> configureOptions)
         => builder.AddClientCredentials(ClientCredentialsDefaults.AuthenticationScheme, configureOptions);
 
+    // Configure an Authentication Scheme (normally ClientCredentialsDefaults.AuthenticationScheme)
+    // Add a named options for the JwtBearerOptions with the authScheme
+    // Enable JwtBearer for this authScheme (extract and validate JWT token from the Authorization request header => Claims that will be put in AuthorizationHandlerContext)
     public static AuthenticationBuilder AddClientCredentials(this AuthenticationBuilder builder, string authScheme, Action<JwtBearerOptions> configureOptions)
     {
         ArgumentNullException.ThrowIfNull(builder);

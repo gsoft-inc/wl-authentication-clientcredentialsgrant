@@ -3,6 +3,7 @@
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Authorization;
 
+[Obsolete("Use RequireClientCredentialsAttribute instead")]
 public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
 {
     private readonly Dictionary<ClientCredentialsScope, string> _policyScopeMapping = new()
