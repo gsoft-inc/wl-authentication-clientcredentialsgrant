@@ -7,10 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-public class RequireClientCredentialsRequirementHandler: AuthorizationHandler<RequireClientCredentialsRequirement>
+// Inspired from https://github.com/AzureAD/microsoft-identity-web/blob/2.17.0/src/Microsoft.Identity.Web/Policy/ScopeAuthorizationHandler.cs#L38
+internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler<RequireClientCredentialsRequirement>
 {
-    private readonly ScopeFormat _scopeFormat;
-
     private static readonly HashSet<string> ScopeClaimTypes = new(StringComparer.Ordinal)
     {
         // Claim type currently used by our products
@@ -29,8 +28,6 @@ public class RequireClientCredentialsRequirementHandler: AuthorizationHandler<Re
 
     public RequireClientCredentialsRequirementHandler(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor)
     {
-        // TODO: Scope format to Options
-        this._scopeFormat = ScopeFormat.Generic;
         this._jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
     }
     
@@ -70,27 +67,19 @@ public class RequireClientCredentialsRequirementHandler: AuthorizationHandler<Re
             return false;
         }
 
-        requiredScopes = requiredPermissions.Select(this.FormatScope).ToArray();
+        requiredScopes = requiredPermissions.SelectMany(this.FormatScopes).ToArray();
         return true;
     }
 
-    private string FormatScope(string requiredPermission)
+    private string[] FormatScopes(string requiredPermission)
     {
-        switch (this._scopeFormat)
-        {
-            case ScopeFormat.Generic:
-                return requiredPermission;
-            case ScopeFormat.FusionAuth:
-                return $"{this._jwtOptions.Audience}:{requiredPermission}";
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        return [requiredPermission, $"{this._jwtOptions.Audience}:{requiredPermission}"];
     }
     
     private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, string[] requiredPermissions)
     {
         return claimsPrincipal.Claims
-            .Where(claim => ScopeClaimTypes.Contains(claim.Type)) // TODO: Is it safe or should it be configured?
-            .Any(claim => requiredPermissions.Contains(claim.Value, StringComparer.Ordinal)); // TODO: Should we also test if Value contains of the requiredPermissions (in the case it is a list of scopes)?
+            .Where(claim => ScopeClaimTypes.Contains(claim.Type))
+            .Any(claim => requiredPermissions.Contains(claim.Value, StringComparer.Ordinal));
     }
 }

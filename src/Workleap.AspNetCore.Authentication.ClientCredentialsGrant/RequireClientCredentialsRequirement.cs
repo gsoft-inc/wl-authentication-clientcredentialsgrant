@@ -2,4 +2,4 @@
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-public sealed class RequireClientCredentialsRequirement : IAuthorizationRequirement;
+internal sealed class RequireClientCredentialsRequirement : IAuthorizationRequirement;
