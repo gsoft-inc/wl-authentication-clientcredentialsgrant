@@ -1,6 +1,7 @@
 ﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -67,8 +68,16 @@ public static class AuthorizationExtensions
                         .RequireAuthenticatedUser()
                         .RequireClaim("scope", $"{jwtOptions.Audience}:{ScopeClaimMapping[ClientCredentialsScope.Admin]}"));
                 
-                // Could use RequireAssertion to skip the AuhtorizationHandler (maybe not)
+                authorizationOptions.AddPolicy(
+                    ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy,
+                    policy => policy
+                        .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()
+                        .AddRequirements(new RequireClientCredentialsRequirement()));
             });
+        
+        // Add pr TryAddEnumerable?
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IAuthorizationHandler, RequireClientCredentialsRequirementHandler>());
 
         return services;
     }

@@ -21,7 +21,7 @@ public sealed class RequireClientCredentialsAttribute: AuthorizeAttribute
     
     public RequireClientCredentialsAttribute(string requiredPermission, params string[] additionalRequiredPermissions)
     {
-        this.Policy = ClientCredentialsDefaults.ClientCredentialRequirePermissions;
+        this.Policy = ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy;
         this.RequiredPermissions = [requiredPermission, ..additionalRequiredPermissions];
     }
 

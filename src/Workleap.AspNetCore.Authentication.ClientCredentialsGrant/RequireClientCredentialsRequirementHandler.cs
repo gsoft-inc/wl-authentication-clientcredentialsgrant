@@ -27,10 +27,10 @@ public class RequireClientCredentialsRequirementHandler: AuthorizationHandler<Re
 
     private readonly JwtBearerOptions _jwtOptions;
 
-    // TODO: Scope format to Options
-    public RequireClientCredentialsRequirementHandler(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor, ScopeFormat scopeFormat)
+    public RequireClientCredentialsRequirementHandler(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor)
     {
-        this._scopeFormat = scopeFormat;
+        // TODO: Scope format to Options
+        this._scopeFormat = ScopeFormat.Generic;
         this._jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
     }
     
