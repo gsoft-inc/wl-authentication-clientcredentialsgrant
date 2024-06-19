@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-// TODO: Permission or Scope (or RequireClientCredentials)
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
 {

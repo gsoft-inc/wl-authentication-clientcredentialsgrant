@@ -101,22 +101,19 @@ public class RequireClientCredentialsRequirementHandlerTests
     private AuthorizationHandlerContext ConfigureHandlerContext(List<Claim> claims, List<string> requiredPermissions)
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        
         var requiredPermissionsAttribute = new RequireClientCredentialsAttribute(requiredPermissions.First(), requiredPermissions.Skip(1).ToArray());
-        var metadata = new EndpointMetadataCollection(requiredPermissionsAttribute);
-        
-        var httpContext = A.Fake<HttpContext>();
-        var endpoint = new Endpoint(default, metadata, default);
-        var featureCollection = new FeatureCollection();
-        var endpointsFeature = new EndpointFeature(endpoint);
-        featureCollection[typeof(IEndpointFeature)] = endpointsFeature;
-        A.CallTo(() => httpContext.Features).Returns(featureCollection);
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Features.Set<IEndpointFeature>(new EndpointFeature
+        {
+            Endpoint = new Endpoint(default, new EndpointMetadataCollection(requiredPermissionsAttribute), default),
+        });
 
         return new AuthorizationHandlerContext(new[] { new RequireClientCredentialsRequirement() }, user, httpContext);
     }
     
-    private class EndpointFeature(Endpoint? endpoint) : IEndpointFeature
+    private class EndpointFeature : IEndpointFeature
     {
-        public Endpoint? Endpoint { get; set; } = endpoint;
+        public Endpoint? Endpoint { get; set; }
     }
 }

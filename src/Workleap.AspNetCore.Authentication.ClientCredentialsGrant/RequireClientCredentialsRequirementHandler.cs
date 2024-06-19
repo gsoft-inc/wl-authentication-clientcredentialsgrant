@@ -15,8 +15,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         // Claim type currently used by our products
         "scope",
 
-        // However, we should use "scp" instead. "scp" is more common than "scope", as well as being shorter.
-        // We put it here in case we ever do the switch.
+        // However "scp" is more common than "scope", as well as being shorter.
         "scp",
 
         // "scp" is by default mapped to this claim type in ASP.NET Core
@@ -59,7 +58,6 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
             _ => null,
         };
 
-        // Why blog proposed interface?
         var requiredPermissions = endpoint?.Metadata.GetMetadata<RequireClientCredentialsAttribute>()?.RequiredPermissions;
 
         if (requiredPermissions == null)
