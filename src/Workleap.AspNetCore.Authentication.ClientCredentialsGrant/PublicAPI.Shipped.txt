@@ -10,7 +10,12 @@ Microsoft.AspNetCore.Authorization.ClientCredentialsScope.Read = 0 -> Microsoft.
 Microsoft.AspNetCore.Authorization.ClientCredentialsScope.Write = 1 -> Microsoft.AspNetCore.Authorization.ClientCredentialsScope
 Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions
 Microsoft.Extensions.DependencyInjection.AuthorizationExtensions
+Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute
+Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute.RequireClientCredentialsAttribute(Microsoft.AspNetCore.Authorization.ClientCredentialsScope scope) -> void
+Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute.RequireClientCredentialsAttribute(string! requiredPermission, params string![]! additionalRequiredPermissions) -> void
+Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsExtensions
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, string! authScheme, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 static Microsoft.Extensions.DependencyInjection.AuthenticationBuilderExtensions.AddClientCredentials(this Microsoft.AspNetCore.Authentication.AuthenticationBuilder! builder, System.Action<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions!>! configureOptions) -> Microsoft.AspNetCore.Authentication.AuthenticationBuilder!
 static Microsoft.Extensions.DependencyInjection.AuthorizationExtensions.AddClientCredentialsAuthorization(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsExtensions.RequirePermission<TBuilder>(this TBuilder endpointConventionBuilder, string! requiredPermission, params string![]! additionalRequiredPermissions) -> TBuilder

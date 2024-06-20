@@ -1,6 +1,1 @@
 #nullable enable
-static Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsExtensions.RequirePermission<TBuilder>(this TBuilder endpointConventionBuilder, string! requiredPermission, params string![]! additionalRequiredPermissions) -> TBuilder
-Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute
-Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute.RequireClientCredentialsAttribute(Microsoft.AspNetCore.Authorization.ClientCredentialsScope scope) -> void
-Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsAttribute.RequireClientCredentialsAttribute(string! requiredPermission, params string![]! additionalRequiredPermissions) -> void
-Workleap.AspNetCore.Authentication.ClientCredentialsGrant.RequireClientCredentialsExtensions
