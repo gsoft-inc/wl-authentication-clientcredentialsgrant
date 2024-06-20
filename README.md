@@ -33,7 +33,8 @@ The **client-side library** includes:
 The **server-side library** includes:
 
 * JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
-* Default authorization policies, but you can still create your own policies.
+* Authorization attribute and policy to easily enforce granular scopes on your endpoints.
+* Authorization attribute and policy to easily enforce classic Workleap permissions (read, write, admin).
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
 * Support for ASP.NET Core 6.0 and later.
 
@@ -114,6 +115,12 @@ _This client-side library is based on [Duende.AccessTokenManagement](https://git
 
 ### Server-side library
 
+The server-side library add the RequireClientCredentials attributes that simplify the use of the client credentials flow in your ASP.NET Core application:
+- Simply specify the required permissions in the attribute (e.g: `[RequireClientCredentials("read")`]
+- Support multiple claims types (e.g: `scope`, `scp`, `http://schemas.microsoft.com/identity/claims/scope`)
+- Support multiple claims format (e.g: `read`, `{Audience}:read`)
+
+
 Install the package [Workleap.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/Workleap.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
 
 ```csharp
@@ -139,15 +146,27 @@ For instance, the example above works well with this `appsettings.json`:
 }
 ```
 
-Next, register the authorization services:
+Next protect your endpoints with the `RequireClientCredentials` attribute:
 
 ```csharp
-builder.Services.AddAuthorization(options =>
-{
-    // Change the scheme here if you registered a custom scheme in the authentication services.
-    // You can also add requirements to your policy, such as '.RequireClaim("name", "value", ["values"])'.
-    options.AddPolicy("my-policy", x => x.AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme).RequireAuthenticatedUser());
-});
+
+// When using Controlled-Based
+[HttpGet]
+[Route("weather")]
+[RequireClientCredentials("read")]
+public async Task<IActionResult> GetWeather()
+{...}
+
+// When using Minimal APIs
+app.MapGet("/weather", () => {...}).RequirePermission("read");
+```
+
+Next, register the authorization services which all the required authorization policies:
+
+```csharp
+builder.Services
+    .AddClientCredentialsAuthorization()
+    ;
 ```
 
 Finally, register the authentication and authorization middlewares in your ASP.NET Core app and decorate your endpoints with the `AuthorizeAttribute`:

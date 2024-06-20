@@ -115,6 +115,8 @@ public class IntegrationTests
         webApp.MapGet("/public", () => "This endpoint is public").RequireHost("invoice-app.local");
         webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationReadPolicy).RequireHost("invoice-app.local");
         webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationWritePolicy).RequireHost("invoice-app.local");
+        webApp.MapGet("/read-invoices-granular", () => "This protected endpoint is for reading invoices").RequirePermission("read").RequireHost("invoice-app.local");
+        webApp.MapGet("/pay-invoices-granular", () => "This protected endpoint is for paying invoices").RequirePermission("pay").RequireHost("invoice-app.local");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 
@@ -147,13 +149,21 @@ public class IntegrationTests
             var publicEndpointResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/public", cts.Token);
             Assert.Equal("This endpoint is public", publicEndpointResponse);
 
-            // Reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
+            // Using the classic policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
             var readInvoicesResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices", cts.Token);
             Assert.Equal("This protected endpoint is for reading invoices", readInvoicesResponse);
+            
+            // Using the granular policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
+            var readInvoicesGranularResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices-granular", cts.Token);
+            Assert.Equal("This protected endpoint is for reading invoices", readInvoicesGranularResponse);
 
-            // Paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
-            var forbiddenException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices", cts.Token));
-            Assert.Equal(HttpStatusCode.Forbidden, forbiddenException.StatusCode);
+            // Using the classic policy, paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
+            var payInvoicesException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices", cts.Token));
+            Assert.Equal(HttpStatusCode.Forbidden, payInvoicesException.StatusCode);
+
+            // Using the granular policy, paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
+            var payInvoicesGranularException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices-granular", cts.Token));
+            Assert.Equal(HttpStatusCode.Forbidden, payInvoicesGranularException.StatusCode);
 
             // We require JWT-authenticated requests to be sent over HTTPS
             var unsecuredException = await Assert.ThrowsAsync<ClientCredentialsException>(() => invoicesReadHttpClient.GetStringAsync("http://invoice-app.local/public", cts.Token));

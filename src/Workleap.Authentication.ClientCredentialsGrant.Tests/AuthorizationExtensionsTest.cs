@@ -43,16 +43,35 @@ public class AuthorizationExtensionsTest
         Assert.NotNull(authorizationValues);
 
         var readPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationReadPolicy);
-        ValidatePolicy(readPolicy, ClientCredentialsScope.Read);
+        ValidateClassicPolicy(readPolicy, ClientCredentialsScope.Read);
 
         var writePolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationWritePolicy);
-        ValidatePolicy(writePolicy, ClientCredentialsScope.Write);
+        ValidateClassicPolicy(writePolicy, ClientCredentialsScope.Write);
 
         var adminPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationAdminPolicy);
-        ValidatePolicy(adminPolicy, ClientCredentialsScope.Admin);
+        ValidateClassicPolicy(adminPolicy, ClientCredentialsScope.Admin);
+        
+        var requirePermissionPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy);
+        ValidateRequirePermissionPolicy(requirePermissionPolicy);
+    }
+    
+    [Fact]
+    public async Task GivenIServiceCollection_WhenAddClientCredentialsAuthorization_ThenRequirementHandlerRegistered()
+    {
+        // Given
+        var services = new ServiceCollection();
+
+        // When
+        services.AddClientCredentialsAuthorization();
+
+        // Then
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        var authorizationHandlers = serviceProvider.GetServices<IAuthorizationHandler>();
+        Assert.Single(authorizationHandlers.OfType<RequireClientCredentialsRequirementHandler>());
     }
 
-    private static void ValidatePolicy(AuthorizationPolicy? policy, ClientCredentialsScope scope)
+    private static void ValidateClassicPolicy(AuthorizationPolicy? policy, ClientCredentialsScope scope)
     {
         Assert.NotNull(policy);
         Assert.Collection(
@@ -78,6 +97,27 @@ public class AuthorizationExtensionsTest
 
                 var allowedScope = Assert.Single(requirement.AllowedValues);
                 Assert.Equal($"{DefaultAudience}:{AuthorizationExtensions.ScopeClaimMapping[scope]}", allowedScope);
+            });
+    }
+    
+    private static void ValidateRequirePermissionPolicy(AuthorizationPolicy? policy)
+    {
+        Assert.NotNull(policy);
+        Assert.Collection(
+            policy.AuthenticationSchemes,
+            scheme =>
+            {
+                Assert.Equal(ClientCredentialsDefaults.AuthenticationScheme, scheme);
+            });
+        Assert.Collection(
+            policy.Requirements,
+            x =>
+            {
+                Assert.Equal(typeof(DenyAnonymousAuthorizationRequirement), x.GetType());
+            },
+            x =>
+            {
+                Assert.Equal(typeof(RequireClientCredentialsRequirement), x.GetType());
             });
     }
 }

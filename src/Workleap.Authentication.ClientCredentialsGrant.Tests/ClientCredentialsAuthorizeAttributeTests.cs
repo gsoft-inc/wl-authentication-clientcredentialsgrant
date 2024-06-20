@@ -15,7 +15,7 @@ public class ClientCredentialsAuthorizeAttributeTests
     }
 
     [Fact]
-    public void GivenInValidScope_WhenCreate_ThenMapToProperPolicyName()
+    public void GivenInValidScope_WhenCreate_ThenThrowArgumentException()
     {
         var scope = (ClientCredentialsScope)999;
         Assert.Throws<ArgumentException>(() => new ClientCredentialsAuthorizeAttribute(scope));
