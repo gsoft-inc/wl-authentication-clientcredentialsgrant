@@ -47,7 +47,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         return Task.CompletedTask;
     }
 
-    private bool TryGetRequiredScopes(AuthorizationHandlerContext context, [NotNullWhen(true)] out string[]? requiredScopes)
+    private bool TryGetRequiredScopes(AuthorizationHandlerContext context, [NotNullWhen(true)] out HashSet<string>? requiredScopes)
     {
         requiredScopes = null;
         
@@ -65,7 +65,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
             return false;
         }
 
-        requiredScopes = requiredPermissions.SelectMany(this.FormatScopes).ToArray();
+        requiredScopes = requiredPermissions.SelectMany(this.FormatScopes).ToHashSet(StringComparer.Ordinal);
         return true;
     }
 
@@ -74,10 +74,10 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         return [requiredPermission, $"{this._jwtOptions.Audience}:{requiredPermission}"];
     }
     
-    private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, string[] requiredPermissions)
+    private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, HashSet<string> requiredPermissions)
     {
         return claimsPrincipal.Claims
             .Where(claim => ScopeClaimTypes.Contains(claim.Type))
-            .Any(claim => requiredPermissions.Contains(claim.Value, StringComparer.Ordinal));
+            .Any(claim => requiredPermissions.Contains(claim.Value));
     }
 }
