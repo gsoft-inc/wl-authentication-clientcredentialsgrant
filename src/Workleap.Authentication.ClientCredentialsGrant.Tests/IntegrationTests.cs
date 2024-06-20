@@ -28,7 +28,6 @@ public class IntegrationTests
     }
 
     [Fact]
-    [RequireClientCredentialsAttribute("asd")]
     public async Task Real_Client_Server_Communication()
     {
         // Define some OAuth 2.0 scopes for fictional invoices access management
