@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Workleap.AspNetCore.Authentication.ClientCredentialsGrant.Swagger;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,19 @@ public static class AuthenticationBuilderExtensions
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<JwtBearerOptions>>(new JwtBearerOptionsValidator(authScheme)));
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>>(new ClientCredentialsPostConfigureOptions(authScheme)));
         }
+        
+        builder.Services.ConfigureSwaggerGen(options =>
+        {
+            if (options.OperationFilterDescriptors.All(x => x.Type != typeof(SecurityRequirementOperationFilter)))
+            {
+                options.OperationFilter<SecurityRequirementOperationFilter>();
+            }
+            
+            if (options.OperationFilterDescriptors.All(x => x.Type != typeof(SecurityDefinitionDocumentFilter)))
+            {
+                options.DocumentFilter<SecurityDefinitionDocumentFilter>();
+            }
+        });
 
         return builder;
     }

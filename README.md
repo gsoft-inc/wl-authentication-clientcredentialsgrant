@@ -165,8 +165,7 @@ Next, register the authorization services which all the required authorization p
 
 ```csharp
 builder.Services
-    .AddClientCredentialsAuthorization()
-    ;
+    .AddClientCredentialsAuthorization();
 ```
 
 Finally, register the authentication and authorization middlewares in your ASP.NET Core app and decorate your endpoints with the `AuthorizeAttribute`:

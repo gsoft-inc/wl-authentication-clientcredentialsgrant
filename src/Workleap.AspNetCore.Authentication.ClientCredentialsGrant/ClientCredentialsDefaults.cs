@@ -13,4 +13,6 @@ public static class ClientCredentialsDefaults
     internal const string AuthorizationWritePolicy = "ClientCredentialsWrite";
 
     internal const string AuthorizationAdminPolicy = "ClientCredentialsAdmin";
+    
+    internal static readonly string OpenApiSecurityDefinitionId = $"oauth2-{AuthenticationScheme.ToLowerInvariant()}";
 }
