@@ -1,1 +1,1 @@
-extends: [[https://raw.githubusercontent.com/gsoft-inc/wl-api-guidelines/main/.spectral.yaml, false]]
+extends: [[https://raw.githubusercontent.com/gsoft-inc/wl-api-guidelines/main/backend.spectral.yaml, false]]

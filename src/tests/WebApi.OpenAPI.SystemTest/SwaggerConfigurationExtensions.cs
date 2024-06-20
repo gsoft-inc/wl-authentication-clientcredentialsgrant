@@ -1,5 +1,4 @@
 ﻿using Microsoft.OpenApi.Models;
-using Workleap.Extensions.OpenAPI;
 
 namespace WebApi.OpenAPI.SystemTest;
 
@@ -15,9 +14,6 @@ public static class SwaggerConfigurationExtensions
             options.SwaggerDoc("v1", new OpenApiInfo { Title = "Test API", Version = "v1" });
             options.EnableAnnotations();
         });
-
-        services.ConfigureOpenApiGeneration()
-            .GenerateMissingOperationId();
 
         return services;
     }
