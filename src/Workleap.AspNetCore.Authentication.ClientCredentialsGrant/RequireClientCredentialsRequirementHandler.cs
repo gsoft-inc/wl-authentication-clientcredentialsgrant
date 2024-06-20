@@ -74,10 +74,10 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         return [requiredPermission, $"{this._jwtOptions.Audience}:{requiredPermission}"];
     }
     
-    private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, string[] requiredPermissions)
+    private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, string[] requiredScopes)
     {
         return claimsPrincipal.Claims
             .Where(claim => ScopeClaimTypes.Contains(claim.Type))
-            .Any(claim => requiredPermissions.Contains(claim.Value, StringComparer.Ordinal));
+            .Any(claim => requiredScopes.Contains(claim.Value, StringComparer.Ordinal));
     }
 }

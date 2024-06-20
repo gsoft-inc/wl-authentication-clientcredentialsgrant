@@ -39,13 +39,17 @@ public class RequireClientCredentialsRequirementHandlerTests
         Assert.True(context.HasSucceeded);
     }
     
-    [Fact]
-    public async Task GivenUserHaveOneOfTheRequiredScopes_WhenHandleRequirement_ThenSucceeded()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GivenUserHaveOneOfTheRequiredScopes_WhenHandleRequirement_ThenSucceeded(bool usePrefixAudienceFormat)
     {
         // Given
+        var expectedAudience = "invoices";
+        
         var userClaims = new List<Claim>
         {
-            new("scope", "requiredPermission"),
+            new("scope", usePrefixAudienceFormat ? $"{expectedAudience}:requiredPermission" : "requiredPermission"),
             new("scope", "otherPermission"),
         };
         
@@ -56,7 +60,10 @@ public class RequireClientCredentialsRequirementHandlerTests
         };
 
         var context = this.ConfigureHandlerContext(userClaims, requiredPermissions);
-        var handler = this.ConfigureHandler(new JwtBearerOptions());
+        var handler = this.ConfigureHandler(new JwtBearerOptions()
+        {
+            Audience = expectedAudience,
+        });
 
         // When
         await handler.HandleAsync(context);
@@ -93,7 +100,7 @@ public class RequireClientCredentialsRequirementHandlerTests
     private RequireClientCredentialsRequirementHandler ConfigureHandler(JwtBearerOptions jwtOptions)
     {
         var jwtOptionsMonitor = A.Fake<IOptionsMonitor<JwtBearerOptions>>();
-        A.CallTo(() => jwtOptionsMonitor.CurrentValue).Returns(jwtOptions);
+        A.CallTo(() => jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme)).Returns(jwtOptions);
         
         return new RequireClientCredentialsRequirementHandler(jwtOptionsMonitor);
     }

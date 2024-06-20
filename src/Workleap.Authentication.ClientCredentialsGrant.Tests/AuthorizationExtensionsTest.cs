@@ -61,8 +61,6 @@ public class AuthorizationExtensionsTest
         // Given
         var services = new ServiceCollection();
 
-        services.AddOptions<JwtBearerOptions>(ClientCredentialsDefaults.AuthenticationScheme);
-        
         // When
         services.AddClientCredentialsAuthorization();
 

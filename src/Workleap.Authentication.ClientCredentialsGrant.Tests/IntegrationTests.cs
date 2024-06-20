@@ -16,9 +16,6 @@ using Secret = Duende.IdentityServer.Models.Secret;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests;
 
-// TODO: Check if would be more readable + easier to evolve to:
-// - Use Setup to configure everything with more granular test
-// - Create a real WebAPI project that we just start as a TestServer here? (closer feeling of real-world scenario and usage of this library + able to test Controller-Based Endpoints)
 public class IntegrationTests
 {
     private const string Audience = "invoices";
@@ -31,6 +28,7 @@ public class IntegrationTests
     }
 
     [Fact]
+    [RequireClientCredentialsAttribute("asd")]
     public async Task Real_Client_Server_Communication()
     {
         // Define some OAuth 2.0 scopes for fictional invoices access management
