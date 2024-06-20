@@ -32,7 +32,7 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
     /// </example>
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The arguments are transformed.")]
     public RequireClientCredentialsAttribute(ClientCredentialsScope scope)
-        : this(EnumScopeNameMapping.GetValueOrDefault(scope) ?? throw new ArgumentException($"{scope} is not an valid scope value"))
+        : this(EnumScopeNameMapping.GetValueOrDefault(scope) ?? throw new ArgumentOutOfRangeException(nameof(scope), scope, $"'{scope}' is not an valid scope value"))
     {
     }
     
