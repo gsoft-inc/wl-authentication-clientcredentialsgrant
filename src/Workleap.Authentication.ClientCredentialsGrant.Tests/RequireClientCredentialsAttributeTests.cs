@@ -19,7 +19,7 @@ public class RequireClientCredentialsAttributeTests
     public void GivenInvalidClassicScope_WhenCreate_ThenThrowArgumentException()
     {
         var scope = (ClientCredentialsScope)999;
-        Assert.Throws<ArgumentException>(() => new RequireClientCredentialsAttribute(scope));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new RequireClientCredentialsAttribute(scope));
     }
     
     [Fact]
