@@ -7,9 +7,6 @@ namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
 {
-    /// <summary>
-    /// asd
-    /// </summary>
     private static readonly Dictionary<ClientCredentialsScope, string> EnumScopeNameMapping = new()
     {
         [ClientCredentialsScope.Read] = "read",
@@ -18,8 +15,8 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
     };
 
     /// <summary>
-    /// Verifies that the web API is called with the right classic scope. <br/>
-    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scop <br/>
+    /// Verifies that the endpoint is called with the right classic scope. <br/>
+    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
     /// - It will accept those value format: `read`, `{Audience}:read`
     /// </summary>
     /// <remarks>
@@ -37,8 +34,8 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
     }
     
     /// <summary>
-    /// Verifies that the web API is called with the right granular permissions. <br/>
-    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scop <br/>
+    /// Verifies that the endpoint is called with the right granular permissions. <br/>
+    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
     /// - It will accept those value format: `read`, `{Audience}:read`
     /// </summary>
     /// <param name="requiredPermission">Permissions accepted. The users only needs to have one of those permissions.</param>
@@ -60,8 +57,8 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
 public static class RequireClientCredentialsExtensions
 {
     /// <summary>
-    /// Verifies that the web API is called with the right granular permissions. <br/>
-    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scop <br/>
+    /// Verifies that the endpoint is called with the right granular permissions. <br/>
+    /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
     /// - It will accept those value format: `read`, `{Audience}:read`
     /// </summary>
     /// <param name="requiredPermission">Permissions accepted. The users only needs to have one of those permissions.</param>
