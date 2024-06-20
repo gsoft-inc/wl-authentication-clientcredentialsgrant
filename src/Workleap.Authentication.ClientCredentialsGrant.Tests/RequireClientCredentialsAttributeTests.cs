@@ -34,7 +34,7 @@ public class RequireClientCredentialsAttributeTests
     [Fact]
     public void GivenMultiplePermission_WhenCreate_ThenSamePermissions()
     {
-        var expectedPermissions = new [] { "cocktail.drink", "cocktail.make", "cocktail.buy" };
+        var expectedPermissions = new[] { "cocktail.drink", "cocktail.make", "cocktail.buy" };
         var attribute = new RequireClientCredentialsAttribute(expectedPermissions.First(), expectedPermissions.Skip(1).ToArray());
         Assert.True(attribute.RequiredPermissions.SetEquals(expectedPermissions));
     }

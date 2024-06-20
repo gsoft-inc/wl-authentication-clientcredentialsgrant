@@ -112,7 +112,7 @@ public class RequireClientCredentialsRequirementHandlerTests
         return new AuthorizationHandlerContext(new[] { new RequireClientCredentialsRequirement() }, user, httpContext);
     }
     
-    private class EndpointFeature : IEndpointFeature
+    private sealed class EndpointFeature : IEndpointFeature
     {
         public Endpoint? Endpoint { get; set; }
     }
