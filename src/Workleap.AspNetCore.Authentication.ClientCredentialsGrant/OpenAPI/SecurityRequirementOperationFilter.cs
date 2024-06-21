@@ -11,12 +11,11 @@ namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
 internal sealed class SecurityRequirementOperationFilter : IOperationFilter
 {
-    private readonly string? _audience;
+    private readonly JwtBearerOptions _jwtOptions;
 
     public SecurityRequirementOperationFilter(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor)
     {
-        var jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
-        this._audience = jwtOptions.Audience;
+        this._jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
     }
     
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
@@ -89,7 +88,7 @@ internal sealed class SecurityRequirementOperationFilter : IOperationFilter
     {
         foreach (var permission in permissions)
         {
-            yield return $"target-entity:{this._audience}:{permission}";
+            yield return $"target-entity:{this._jwtOptions.Audience}:{permission}";
         }
     }
 }
