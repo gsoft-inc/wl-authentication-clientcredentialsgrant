@@ -3,6 +3,25 @@ info:
   title: Test API
   version: v1
 paths:
+  /minimal-api:
+    get:
+      tags:
+        - ClientCredentials
+      summary: 'Required scope: cocktail.make.'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - oauth2-clientcredentials:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
   /controller-single-permission-with-summary:
     get:
       tags:
@@ -48,25 +67,6 @@ paths:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
-  /minimal-api:
-    get:
-      tags:
-        - 'WebApi.OpenAPI.SystemTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
-      summary: 'Required scope: cocktail.make.'
-      responses:
-        '200':
-          description: OK
-          content:
-            text/plain:
-              schema:
-                type: string
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-        - oauth2-clientcredentials:
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
 components:
   securitySchemes:
     oauth2-clientcredentials:

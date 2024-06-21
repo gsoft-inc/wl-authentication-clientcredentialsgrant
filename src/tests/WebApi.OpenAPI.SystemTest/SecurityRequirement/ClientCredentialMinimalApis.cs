@@ -8,6 +8,7 @@ public static class ClientCredentialMinimalApis
     {
         app.MapGet("minimal-api", () => "Hello World")
             .RequirePermission("cocktail.make")
+            .WithTags("ClientCredentials")
             .WithOpenApi();
     }
 }
