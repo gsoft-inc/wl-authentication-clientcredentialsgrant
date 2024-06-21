@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.Swagger;
+namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
 internal sealed class SecurityDefinitionDocumentFilter : IDocumentFilter
 {

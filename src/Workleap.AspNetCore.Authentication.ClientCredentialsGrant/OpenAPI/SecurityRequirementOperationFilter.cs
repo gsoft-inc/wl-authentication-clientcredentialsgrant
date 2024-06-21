@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.Swagger;
+namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
 internal sealed class SecurityRequirementOperationFilter : IOperationFilter
 {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Workleap.AspNetCore.Authentication.ClientCredentialsGrant.Swagger;
+using Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;

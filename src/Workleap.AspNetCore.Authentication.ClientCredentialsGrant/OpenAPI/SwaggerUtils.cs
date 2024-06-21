@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.Swagger;
+namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
 internal static class SwaggerUtils
 {

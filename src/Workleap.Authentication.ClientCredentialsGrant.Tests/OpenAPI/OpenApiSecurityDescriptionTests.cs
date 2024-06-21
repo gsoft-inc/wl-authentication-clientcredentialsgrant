@@ -1,15 +1,14 @@
 ﻿using CliWrap;
 
-namespace Workleap.Authentication.ClientCredentialsGrant.Tests.Swagger;
+namespace Workleap.Authentication.ClientCredentialsGrant.Tests.OpenAPI;
 
 public class OpenApiSecurityDescriptionTests
 {
     [Fact]
-    public async Task TestGeneratedFileMatchesExpectedAsync()
+    public async Task Given_API_With_Client_Credential_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
     {
         var solutionPath = GetSolutionPath();
         
-        // Define the paths
         var testsFolder = Path.Combine(solutionPath, "tests");
         var projectFolder = Path.Combine(testsFolder, "WebApi.OpenAPI.SystemTest");
         var generatedFilePath = Path.Combine(projectFolder, "openapi-v1.yaml");
@@ -40,7 +39,7 @@ public class OpenApiSecurityDescriptionTests
         var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         
-        var solutionDirectory = Directory.GetParent(assemblyDirectory).Parent.Parent.Parent.FullName;
+        var solutionDirectory = Directory.GetParent(assemblyDirectory!)!.Parent!.Parent!.Parent!.FullName;
 
         return solutionDirectory;
     }
