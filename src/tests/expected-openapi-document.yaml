@@ -3,11 +3,11 @@ info:
   title: Test API
   version: v1
 paths:
-  /controller-get:
+  /controller-single-permission-with-summary:
     get:
       tags:
         - ClientCredentials
-      summary: 'Required scope: cocktail.drink.'
+      summary: 'Drink a cocktail. Required scope: cocktail.drink.'
       parameters:
         - name: id
           in: query
@@ -25,11 +25,11 @@ paths:
       security:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
-  /controller-post:
+  /controller-multiple-permissions:
     post:
       tags:
         - ClientCredentials
-      summary: 'Required scope: cocktail.buy.'
+      summary: 'Required scopes: cocktail.buy, cocktail.drink.'
       parameters:
         - name: id
           in: query
@@ -47,6 +47,7 @@ paths:
       security:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
   /minimal-api:
     get:
       tags:
@@ -74,6 +75,7 @@ components:
         clientCredentials:
           tokenUrl: https://localhost:9020/oauth2/token
           scopes:
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make: cocktail.make
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink: cocktail.drink
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy: cocktail.buy
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client_id
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.make for specified client_id: cocktail.make
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.drink for specified client_id: cocktail.drink
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.buy for specified client_id: cocktail.buy

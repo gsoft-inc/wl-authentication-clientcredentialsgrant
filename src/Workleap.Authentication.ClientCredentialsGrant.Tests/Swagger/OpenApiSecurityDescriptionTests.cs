@@ -1,7 +1,8 @@
 ﻿using CliWrap;
 
-// TODO: Update just the output of copilot
-public class OpenApiGenerationTests
+namespace Workleap.Authentication.ClientCredentialsGrant.Tests.Swagger;
+
+public class OpenApiSecurityDescriptionTests
 {
     [Fact]
     public async Task TestGeneratedFileMatchesExpectedAsync()
@@ -19,7 +20,8 @@ public class OpenApiGenerationTests
             .WithWorkingDirectory(projectFolder)
             .WithValidation(CommandResultValidation.None)
             .WithArguments(a => a
-                .Add("build"))
+                .Add("build")
+                .Add("--no-incremental"))
             .ExecuteAsync();
 
         // Check if the build was successful
