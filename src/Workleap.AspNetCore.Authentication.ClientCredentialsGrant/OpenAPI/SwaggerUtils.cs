@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -12,6 +13,12 @@ internal static class SwaggerUtils
 
         if (apiDescription.TryGetMethodInfo(out var methodInfo))
         {
+            var hasAllowAnonymous = methodInfo.GetCustomAttributes<AllowAnonymousAttribute>(inherit: true).Any();
+            if (hasAllowAnonymous)
+            {
+                return Enumerable.Empty<string>();
+            }
+            
             // Controllers - Attributes on the action method (empty for minimal APIs)
             var methodAttributes = methodInfo.GetCustomAttributes<RequireClientCredentialsAttribute>(inherit: true).ToList();
 
