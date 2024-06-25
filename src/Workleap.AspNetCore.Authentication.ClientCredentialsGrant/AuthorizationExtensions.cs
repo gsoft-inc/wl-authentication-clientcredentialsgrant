@@ -17,7 +17,7 @@ public static class AuthorizationExtensions
     };
 
     /// <summary>
-    /// 
+    /// Register the client credentials authorization policies.
     /// </summary>
     public static IServiceCollection AddClientCredentialsAuthorization(this IServiceCollection services)
     {
