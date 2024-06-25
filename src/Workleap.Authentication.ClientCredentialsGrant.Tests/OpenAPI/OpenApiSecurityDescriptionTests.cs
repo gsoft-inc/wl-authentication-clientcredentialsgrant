@@ -1,10 +1,11 @@
 ﻿using CliWrap;
+using Meziantou.Framework;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests.OpenAPI;
 
 public class OpenApiSecurityDescriptionTests
 {
-    [Fact(Skip = "Test if fix build")]
+    [Fact]
     public async Task Given_API_With_Client_Credential_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
     {
         var solutionPath = GetSolutionPath();
@@ -33,14 +34,18 @@ public class OpenApiSecurityDescriptionTests
         Assert.Equal(expectedFileContent, generatedFileContent);
     }
     
-    // TODO: Make this pretty
     private static string GetSolutionPath()
     {
-        var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-        
-        var solutionDirectory = Directory.GetParent(assemblyDirectory!)!.Parent!.Parent!.Parent!.FullName;
+        return GetGitRoot() / "src";
+    }
+    
+    private static FullPath GetGitRoot()
+    {
+        if (FullPath.CurrentDirectory().TryFindFirstAncestorOrSelf(current => Directory.Exists(current / ".git"), out var root))
+        {
+            return root;
+        }
 
-        return solutionDirectory;
+        throw new InvalidOperationException("git root folder not found");
     }
 }
