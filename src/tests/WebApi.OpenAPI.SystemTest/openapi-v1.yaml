@@ -3,11 +3,51 @@ info:
   title: Test API
   version: v1
 paths:
-  /weather:
+  /minimal-api:
+    get:
+      tags:
+        - ClientCredentials
+      summary: 'Given a minimal api RequirePermission with additional permissions, then should describe multiple permissions. Required scopes: cocktail.make, cocktail.buy.'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - oauth2-clientcredentials:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
+  /controller-allow-anonymous-override:
     post:
       tags:
         - ClientCredentials
-      summary: 'Required scope: read.'
+      summary: 'Given endpoint with [RequireClientCredentials] and [AllowAnonymous], then OpenAPI should contains no permission.'
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+  /controller-multiple-permissions:
+    post:
+      tags:
+        - ClientCredentials
+      summary: 'Given endpoint with [RequireClientCredentials], then OpenAPI should contains permission. Required scopes: cocktail.buy, cocktail.drink.'
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: OK
@@ -17,7 +57,8 @@ paths:
           description: Forbidden
       security:
         - oauth2-clientcredentials:
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
 components:
   securitySchemes:
     oauth2-clientcredentials:
@@ -27,4 +68,6 @@ components:
           tokenUrl: https://localhost:9020/oauth2/token
           scopes:
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client_id
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission read for specified client_id: read
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.make for specified client_id: cocktail.make
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.buy for specified client_id: cocktail.buy
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.drink for specified client_id: cocktail.drink

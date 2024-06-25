@@ -53,8 +53,8 @@ public static class AuthorizationExtensions
                 authorizationOptions.AddPolicy(
                     ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy,
                     policy => policy
-                      //  .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
-                      //  .RequireAuthenticatedUser()
+                        .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()
                         .AddRequirements(new RequireClientCredentialsRequirement()));
             });
         
