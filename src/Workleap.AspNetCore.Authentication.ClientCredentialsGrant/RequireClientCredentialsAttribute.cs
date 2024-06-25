@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method)]
 public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
 {
     private static readonly Dictionary<ClientCredentialsScope, string> EnumScopeNameMapping = new()

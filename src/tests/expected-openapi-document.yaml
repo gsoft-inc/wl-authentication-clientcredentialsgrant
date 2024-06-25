@@ -22,7 +22,15 @@ paths:
       security:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
-  /controller-single-permission-with-summary:
+  /controller-allow-anonymous:
+    get:
+      tags:
+        - ClientCredentials
+      summary: See menu
+      responses:
+        '200':
+          description: OK
+  /controller-using-attribute-at-class-level:
     get:
       tags:
         - ClientCredentials
@@ -43,7 +51,7 @@ paths:
       security:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
-  /controller-multiple-permissions:
+  /controller-using-attribute-at-method-level:
     post:
       tags:
         - ClientCredentials

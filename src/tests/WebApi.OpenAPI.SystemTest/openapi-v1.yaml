@@ -7,7 +7,7 @@ paths:
     get:
       tags:
         - ClientCredentials
-      summary: 'Required scope: cocktail.make.'
+      summary: 'Given a minimal api RequirePermission with additional permissions, then should describe multiple permissions. Required scopes: cocktail.make, cocktail.buy.'
       responses:
         '200':
           description: OK
@@ -22,26 +22,12 @@ paths:
       security:
         - oauth2-clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
-  /controller-allow-anonymous:
-    get:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
+  /controller-allow-anonymous-override:
+    post:
       tags:
         - ClientCredentials
-      summary: 'See menu. Required scope: cocktail.drink.'
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-        - oauth2-clientcredentials:
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
-  /controller-using-attribute-at-class-level:
-    get:
-      tags:
-        - ClientCredentials
-      summary: 'Drink a cocktail. Required scope: cocktail.drink.'
+      summary: 'Given endpoint with [RequireClientCredentials] and [AllowAnonymous], then OpenAPI should contains no permission.'
       parameters:
         - name: id
           in: query
@@ -51,18 +37,11 @@ paths:
       responses:
         '200':
           description: OK
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-      security:
-        - oauth2-clientcredentials:
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
-  /controller-using-attribute-at-method-level:
+  /controller-multiple-permissions:
     post:
       tags:
         - ClientCredentials
-      summary: 'Required scopes: cocktail.buy, cocktail.drink.'
+      summary: 'Given endpoint with [RequireClientCredentials], then OpenAPI should contains permission. Required scopes: cocktail.buy, cocktail.drink.'
       parameters:
         - name: id
           in: query
@@ -90,5 +69,5 @@ components:
           scopes:
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client_id
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.make for specified client_id: cocktail.make
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.drink for specified client_id: cocktail.drink
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.buy for specified client_id: cocktail.buy
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission cocktail.drink for specified client_id: cocktail.drink

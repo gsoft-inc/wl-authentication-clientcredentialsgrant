@@ -5,6 +5,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
+/// <summary>
+/// Extract all permissions defined on this API based on the <see cref="RequireClientCredentialsAttribute"/> attributes and set it as security definition in OpenAPI.
+/// </summary>
 internal sealed class SecurityDefinitionDocumentFilter : IDocumentFilter
 {
     private readonly JwtBearerOptions _jwtOptions;

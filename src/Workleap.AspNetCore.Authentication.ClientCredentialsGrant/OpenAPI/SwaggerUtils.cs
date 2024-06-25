@@ -20,17 +20,7 @@ internal static class SwaggerUtils
             }
             
             // Controllers - Attributes on the action method (empty for minimal APIs)
-            var methodAttributes = methodInfo.GetCustomAttributes<RequireClientCredentialsAttribute>(inherit: true).ToList();
-
-            if (methodAttributes.Count != 0)
-            {
-                attributes.AddRange(methodAttributes);
-            }
-            else if (methodInfo.DeclaringType != null)
-            {
-                // Controllers - Attributes on the controller class itself if was not overridden by the action method
-                attributes.AddRange(methodInfo.DeclaringType.GetCustomAttributes<RequireClientCredentialsAttribute>(inherit: true));
-            }
+            attributes.AddRange(methodInfo.GetCustomAttributes<RequireClientCredentialsAttribute>(inherit: true));
         }
 
         // Minimal APIs endpoint metadata (empty for controller actions)

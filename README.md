@@ -35,6 +35,7 @@ The **server-side library** includes:
 * JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
 * Authorization attribute and policy to easily enforce granular scopes on your endpoints.
 * Authorization attribute and policy to easily enforce classic Workleap permissions (read, write, admin).
+* Support of OpenAPI Security Definition and Security Requirement generation when using Swashbuckle.
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
 * Support for ASP.NET Core 6.0 and later.
 
@@ -185,6 +186,36 @@ app.MapGet("/hello-world", () => "Hello World!").RequireAuthorization("my-policy
 [HttpGet("hello-world")]
 public IActionResult HelloWorld() => this.Ok("Hello world");
 ```
+
+#### OpenAPI integration
+
+If you are using Swashbuckle to generate your OpenAPI documentation, if you are using the  `RequireClientCredentials` attribute it will automatically populate the security definitions and requirements in the OpenAPI document.
+
+By example:
+
+```csharp
+
+// When using Controlled-Based
+[HttpGet]
+[Route("weather")]
+[RequireClientCredentials("read")]
+public async Task<IActionResult> GetWeather()
+{...}
+
+// When using Minimal APIs
+app.MapGet("/weather", () => {...}).RequirePermission("read");
+```
+
+Will generate this:
+
+```yaml
+
+
+
+```
+
+
+```csharp
 
 
 ## Building, releasing and versioning

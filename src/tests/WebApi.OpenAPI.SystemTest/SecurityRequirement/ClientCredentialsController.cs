@@ -6,27 +6,21 @@ using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 namespace WebApi.OpenAPI.SystemTest.SecurityRequirement;
 
 [ApiController]
-[RequireClientCredentials("cocktail.drink")]
 public class ClientCredentialsController : ControllerBase
 {
-    [HttpGet]
-    [Route("/controller-allow-anonymous")]
-    [SwaggerOperation(Summary = "See menu")]
-    public IActionResult SeeMenu()
-    {
-        return this.Ok("Hello World!");
-    }
-    
-    [HttpGet]
-    [Route("/controller-using-attribute-at-class-level")]
-    [SwaggerOperation(Summary = "Drink a cocktail")]
-    public IActionResult DrinkCocktail(int id)
+    [HttpPost]
+    [Route("/controller-allow-anonymous-override")]
+    [SwaggerOperation(Summary = "Given endpoint with [RequireClientCredentials] and [AllowAnonymous], then OpenAPI should contains no permission.")]
+    [RequireClientCredentials("cocktail.drink")]
+    [AllowAnonymous]
+    public IActionResult SeeCocktail(int id)
     {
         return this.Ok("Hello World!");
     }
     
     [HttpPost]
-    [Route("/controller-using-attribute-at-method-level")]
+    [Route("/controller-multiple-permissions")]
+    [SwaggerOperation(Summary = "Given endpoint with [RequireClientCredentials], then OpenAPI should contains permission.")]
     [RequireClientCredentials("cocktail.buy", "cocktail.drink")]
     public IActionResult BuyCocktail(int id)
     {

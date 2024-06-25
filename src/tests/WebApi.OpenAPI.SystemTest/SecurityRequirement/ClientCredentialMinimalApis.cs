@@ -7,7 +7,8 @@ public static class ClientCredentialMinimalApis
     public static void AddMinimalEndpoint(this WebApplication app)
     {
         app.MapGet("minimal-api", () => "Hello World")
-            .RequirePermission("cocktail.make")
+            .WithSummary("Given a minimal api RequirePermission with additional permissions, then should describe multiple permissions.")
+            .RequirePermission("cocktail.make", "cocktail.buy")
             .WithTags("ClientCredentials")
             .WithOpenApi();
     }

@@ -16,6 +16,9 @@ public static class AuthorizationExtensions
         [ClientCredentialsScope.Admin] = "admin",
     };
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static IServiceCollection AddClientCredentialsAuthorization(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -50,8 +53,8 @@ public static class AuthorizationExtensions
                 authorizationOptions.AddPolicy(
                     ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy,
                     policy => policy
-                        .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
-                        .RequireAuthenticatedUser()
+                      //  .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
+                      //  .RequireAuthenticatedUser()
                         .AddRequirements(new RequireClientCredentialsRequirement()));
             });
         

@@ -9,6 +9,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 
+/// <summary>
+/// Add client credential security requirement for each endpoints in OpenAPI based on the <see cref="RequireClientCredentialsAttribute"/> attributes.
+/// </summary>
 internal sealed class SecurityRequirementOperationFilter : IOperationFilter
 {
     private readonly JwtBearerOptions _jwtOptions;
