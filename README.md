@@ -191,7 +191,7 @@ public IActionResult HelloWorld() => this.Ok("Hello world");
 
 If you are using Swashbuckle to generate your OpenAPI documentation, if you are using the  `RequireClientCredentials` attribute it will automatically populate the security definitions and requirements in the OpenAPI document.
 
-By example:
+For example:
 
 ```csharp
 
@@ -209,7 +209,30 @@ app.MapGet("/weather", () => {...}).RequirePermission("read");
 Will generate this:
 
 ```yaml
-
+paths:
+  /weather:
+    get:
+      summary: 'Required scope: read.'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - oauth2-clientcredentials:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read /* Based on ClientCredentials options: Audience */
+components:
+  securitySchemes:
+    oauth2-clientcredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:9020/oauth2/token /* Based on ClientCredentials options: Authority */
+          scopes:
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client_id
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission read for specified client_id: read
 
 
 ```
