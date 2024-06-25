@@ -39,8 +39,8 @@ internal sealed class SecurityDefinitionDocumentFilter : IDocumentFilter
     
     private Uri GetTokenUrl()
     {
-        var authority = this._jwtOptions.Authority?.TrimEnd('/') ?? string.Empty;
-        return new Uri($"{authority}/oauth2/token");
+        var authority = this._jwtOptions.Authority?.TrimEnd('/');
+        return new Uri($"{authority}/oauth2/token", UriKind.RelativeOrAbsolute);
     }
     
     private Dictionary<string, string> ExtractScopes(IEnumerable<string> permissions)
