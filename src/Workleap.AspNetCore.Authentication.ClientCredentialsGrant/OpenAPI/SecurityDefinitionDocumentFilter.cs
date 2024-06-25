@@ -39,7 +39,7 @@ internal sealed class SecurityDefinitionDocumentFilter : IDocumentFilter
     
     private Uri GetTokenUrl()
     {
-        var authority = this._jwtOptions.Authority?.TrimEnd('/');
+        var authority = this._jwtOptions.Authority?.TrimEnd('/') ?? string.Empty;
         return new Uri($"{authority}/oauth2/token", UriKind.RelativeOrAbsolute);
     }
     
