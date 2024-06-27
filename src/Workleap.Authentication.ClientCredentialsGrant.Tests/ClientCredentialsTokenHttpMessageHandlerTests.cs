@@ -46,8 +46,9 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
     }
 
     [Fact]
-    public async Task Throws_ClientCredentialsException_When_Http_By_Default()
+    public async Task Throws_ClientCredentialsException_When_Https_Enforced_But_Request_Is_Http()
     {
+        this._options.EnforceHttps = true;
         await Assert.ThrowsAsync<ClientCredentialsException>(() => this._clientCredentialsHttpClient.GetStringAsync("http://whatever", CancellationToken.None));
     }
 

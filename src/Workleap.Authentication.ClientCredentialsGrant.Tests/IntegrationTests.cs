@@ -104,6 +104,7 @@ public class IntegrationTests
                 options.ClientSecret = "invoices_read_client_secret";
                 options.Scope = $"{Audience}:read";
                 options.CacheLifetimeBuffer = tokenCacheLifetimeBuffer;
+                options.EnforceHttps = true;
             });
 
         // Here begins ASP.NET Core middleware pipelines registration
