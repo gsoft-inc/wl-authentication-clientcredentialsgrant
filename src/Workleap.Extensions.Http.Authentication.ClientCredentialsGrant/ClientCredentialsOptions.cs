@@ -53,9 +53,9 @@ public sealed class ClientCredentialsOptions
     internal string CacheKey { get; set; } = string.Empty;
 
     /// <summary>
-    /// Enforce https for all authenticated requests
+    /// Enforce https for all authenticated requests. Default value is false.
     /// </summary>
-    public bool EnforceHttps { get; set; } = true;
+    public bool EnforceHttps { get; set; }
 
     /// <summary>
     /// When set to true, the library will attempt to acquire a token on app startup,
