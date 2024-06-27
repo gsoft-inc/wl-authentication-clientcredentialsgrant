@@ -83,8 +83,8 @@ services.AddOptions<ClientCredentialsOptions>("MyClient").Bind(configuration.Get
 services.AddHttpClient<MyClient>().AddClientCredentialsHandler( /* [...] */);
 ```
 
-Note on `EnforceHttps`.
-It is possible to allow http authenticated requests, however, this should be limited to exceptional scenarios.
+Note on `EnforceHttps`, which is disabled by default.
+It is possible to allow http authenticated requests, however, this should be limited to specific scenarios, such as intra-cluster communication.
 It is strongly advised that you always use https for authenticated requests transmitted as the token sent will be in clear.
 
 Then, instantiate the `HttpClient` later on using `IHttpClientFactory` or directly inject it in the constructor if you used the generic registration:

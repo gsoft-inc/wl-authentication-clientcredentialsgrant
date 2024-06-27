@@ -54,7 +54,6 @@ public sealed class ClientCredentialsTokenHttpMessageHandlerTests : IDisposable
     [Fact]
     public async Task SendAsync_When_EnforceHttps_False_For_Http_Requests()
     {
-        this._options.EnforceHttps = false;
         this._mockPrimaryHttpMessageHandler.ExpectedHttpResponseMessages = new[]
         {
             new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Access granted on first try") },
