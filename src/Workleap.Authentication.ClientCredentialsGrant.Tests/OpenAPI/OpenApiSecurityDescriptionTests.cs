@@ -6,7 +6,7 @@ namespace Workleap.Authentication.ClientCredentialsGrant.Tests.OpenAPI;
 public class OpenApiSecurityDescriptionTests
 {
     [Fact]
-    public async Task Given_API_With_Client_Credential_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
+    public async Task Given_API_With_Client_Credentials_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
     {
         var solutionPath = GetSolutionPath();
         
@@ -19,9 +19,7 @@ public class OpenApiSecurityDescriptionTests
         var result = await Cli.Wrap("dotnet")
             .WithWorkingDirectory(projectFolder)
             .WithValidation(CommandResultValidation.None)
-            .WithArguments(a => a
-                .Add("build")
-                .Add("--no-incremental"))
+            .WithArguments(["build", "--no-incremental"])
             .ExecuteAsync();
 
         // Check if the build was successful
@@ -31,7 +29,7 @@ public class OpenApiSecurityDescriptionTests
         var expectedFileContent = await File.ReadAllTextAsync(expectedFilePath);
         var generatedFileContent = await File.ReadAllTextAsync(generatedFilePath);
 
-        Assert.Equal(expectedFileContent, generatedFileContent);
+        Assert.Equal(expectedFileContent, generatedFileContent, ignoreLineEndingDifferences: true);
     }
     
     private static string GetSolutionPath()

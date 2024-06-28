@@ -9,14 +9,14 @@ internal static class SwaggerUtils
 {
     public static IEnumerable<string> GetRequiredPermissions(ApiDescription apiDescription)
     {
-        List<RequireClientCredentialsAttribute> attributes = new();
+        var attributes = new List<RequireClientCredentialsAttribute>();
 
         if (apiDescription.TryGetMethodInfo(out var methodInfo))
         {
             var hasAllowAnonymous = methodInfo.GetCustomAttributes<AllowAnonymousAttribute>(inherit: true).Any();
             if (hasAllowAnonymous)
             {
-                return Enumerable.Empty<string>();
+                return [];
             }
             
             // Controllers - Attributes on the action method (empty for minimal APIs)
@@ -26,16 +26,16 @@ internal static class SwaggerUtils
         // Minimal APIs endpoint metadata (empty for controller actions)
         attributes.AddRange(apiDescription.ActionDescriptor.EndpointMetadata.OfType<RequireClientCredentialsAttribute>());
 
-        return attributes.SelectMany(attribute => attribute.RequiredPermissions).Distinct();
+        return attributes.SelectMany(attribute => attribute.RequiredPermissions);
     }
 
     // It assumes the identity provider is supporting the target-entity scope format
-    public static string FormatScope(string audience, string permission)
+    public static string FormatScopeForSpecificPermission(string audience, string permission)
     {
         return $"target-entity:{audience}:{permission}";
     }
     
-    public static string GetAllScope(string audience)
+    public static string GetScopeForAnyPermission(string audience)
     {
         return $"target-entity:{audience}";
     }

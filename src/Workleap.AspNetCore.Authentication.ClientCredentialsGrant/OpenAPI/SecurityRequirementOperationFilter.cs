@@ -12,38 +12,34 @@ namespace Workleap.AspNetCore.Authentication.ClientCredentialsGrant.OpenAPI;
 /// <summary>
 /// Add client credential security requirement for each endpoints in OpenAPI based on the <see cref="RequireClientCredentialsAttribute"/> attributes.
 /// </summary>
-internal sealed class SecurityRequirementOperationFilter : IOperationFilter
+internal sealed class SecurityRequirementOperationFilter(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor) : IOperationFilter
 {
-    private readonly JwtBearerOptions _jwtOptions;
+    private readonly JwtBearerOptions _jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
 
-    public SecurityRequirementOperationFilter(IOptionsMonitor<JwtBearerOptions> jwtOptionsMonitor)
-    {
-        this._jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
-    }
-    
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var attributes = SwaggerUtils.GetRequiredPermissions(context.ApiDescription).ToArray();
-        if (attributes.Length == 0)
+        var attributes = SwaggerUtils.GetRequiredPermissions(context.ApiDescription).ToHashSet(StringComparer.Ordinal);
+        if (attributes.Count == 0)
         {
             return;
         }
 
         // Method need to be idempotent since minimal api are preserving the state
-        AddAuthzErrorResponse(operation);
+        AddAuthenticationAndAuthorizationErrorResponse(operation);
         this.AddOperationSecurityReference(operation, attributes);
         AppendScopeToOperationSummary(operation, attributes);
     }
     
-    private static void AddAuthzErrorResponse(OpenApiOperation operation)
+    private static void AddAuthenticationAndAuthorizationErrorResponse(OpenApiOperation operation)
     {
         operation.Responses.TryAdd(StatusCodes.Status401Unauthorized.ToString(CultureInfo.InvariantCulture), new OpenApiResponse { Description = ReasonPhrases.GetReasonPhrase(StatusCodes.Status401Unauthorized) });
         operation.Responses.TryAdd(StatusCodes.Status403Forbidden.ToString(CultureInfo.InvariantCulture), new OpenApiResponse { Description = ReasonPhrases.GetReasonPhrase(StatusCodes.Status403Forbidden) });
     }
     
-    private void AddOperationSecurityReference(OpenApiOperation operation, string[] permissions)
+    private void AddOperationSecurityReference(OpenApiOperation operation, HashSet<string> permissions)
     {
-        if (operation.Security.Any(requirement => requirement.Keys.Any(key => key.Reference?.Id == ClientCredentialsDefaults.OpenApiSecurityDefinitionId)))
+        var isAlreadyReferencingSecurityDefinition = operation.Security.Any(requirement => requirement.Keys.Any(key => key.Reference?.Id == ClientCredentialsDefaults.OpenApiSecurityDefinitionId));
+        if (isAlreadyReferencingSecurityDefinition)
         {
             return;
         }
@@ -63,10 +59,10 @@ internal sealed class SecurityRequirementOperationFilter : IOperationFilter
         });
     }
 
-    private static void AppendScopeToOperationSummary(OpenApiOperation operation, string[] scopes)
+    private static void AppendScopeToOperationSummary(OpenApiOperation operation, HashSet<string> scopes)
     {
         var requireScopeSummary = new StringBuilder();
-        requireScopeSummary.Append(scopes.Length == 1 ? "Required scope: " : "Required scopes: ");
+        requireScopeSummary.Append(scopes.Count == 1 ? "Required permission: " : "Required permissions: ");
         requireScopeSummary.Append(string.Join(", ", scopes));
         requireScopeSummary.Append('.');
         
@@ -87,11 +83,11 @@ internal sealed class SecurityRequirementOperationFilter : IOperationFilter
         operation.Summary = summary.ToString();
     }
     
-    private IEnumerable<string> ExtractScopes(string[] permissions)
+    private IEnumerable<string> ExtractScopes(HashSet<string> permissions)
     {
         foreach (var permission in permissions)
         {
-            yield return $"target-entity:{this._jwtOptions.Audience}:{permission}";
+            yield return SwaggerUtils.FormatScopeForSpecificPermission(this._jwtOptions.Audience!, permission);
         }
     }
 }

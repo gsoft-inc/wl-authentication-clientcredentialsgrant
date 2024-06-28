@@ -67,10 +67,10 @@ public static class RequireClientCredentialsExtensions
     /// </remarks>
     /// <example>
     /// <code>
-    /// app.MapGet("/weather", () => {...}).RequirePermission("read");
+    /// app.MapGet("/weather", () => {...}).RequireClientCredentials("read");
     /// </code>
     /// </example>
-    public static TBuilder RequirePermission<TBuilder>(
+    public static TBuilder RequireClientCredentials<TBuilder>(
         this TBuilder endpointConventionBuilder, string requiredPermission, params string[] additionalRequiredPermissions)
         where TBuilder : IEndpointConventionBuilder
     {

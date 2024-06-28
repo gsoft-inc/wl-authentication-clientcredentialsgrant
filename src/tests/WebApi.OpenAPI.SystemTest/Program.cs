@@ -13,11 +13,10 @@ builder.Services.AddClientCredentialsAuthorization();
 
 var app = builder.Build();
 
-app.AddMinimalEndpoint();
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.MapMinimalEndpoint();
 app.MapControllers();
 
 app.Run();
