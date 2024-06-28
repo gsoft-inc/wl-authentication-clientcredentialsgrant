@@ -23,14 +23,11 @@ public class RequireClientCredentialsRequirementHandlerTests
             new(scopeClaimType, "requiredPermission"),
             new(scopeClaimType, "otherPermission"),
         };
-        
-        var requiredPermissions = new List<string>
-        {
-            "requiredPermission",
-        };
 
-        var context = this.ConfigureHandlerContext(userClaims, requiredPermissions);
-        var handler = this.ConfigureHandler(new JwtBearerOptions());
+        var requiredPermission = "requiredPermission";
+
+        var context = ConfigureHandlerContext(userClaims, requiredPermission);
+        var handler = ConfigureHandler(new JwtBearerOptions());
 
         // When
         await handler.HandleAsync(context);
@@ -53,14 +50,10 @@ public class RequireClientCredentialsRequirementHandlerTests
             new("scope", "otherPermission"),
         };
         
-        var requiredPermissions = new List<string>
-        {
-            "requiredPermission",
-            "alternativeRequiredPermission",
-        };
+        var requiredPermission = "requiredPermission";
 
-        var context = this.ConfigureHandlerContext(userClaims, requiredPermissions);
-        var handler = this.ConfigureHandler(new JwtBearerOptions()
+        var context = ConfigureHandlerContext(userClaims, requiredPermission);
+        var handler = ConfigureHandler(new JwtBearerOptions
         {
             Audience = expectedAudience,
         });
@@ -81,14 +74,11 @@ public class RequireClientCredentialsRequirementHandlerTests
             new("scope", "requiredPermission1"),
             new("scope", "otherPermission"),
         };
-        
-        var requiredPermissions = new List<string>
-        {
-            "randomPermission",
-        };
 
-        var context = this.ConfigureHandlerContext(userClaims, requiredPermissions);
-        var handler = this.ConfigureHandler(new JwtBearerOptions());
+        var requiredPermission = "randomPermission";
+
+        var context = ConfigureHandlerContext(userClaims, "randomPermission");
+        var handler = ConfigureHandler(new JwtBearerOptions());
 
         // When
         await handler.HandleAsync(context);
@@ -97,7 +87,7 @@ public class RequireClientCredentialsRequirementHandlerTests
         Assert.False(context.HasSucceeded);
     }
     
-    private RequireClientCredentialsRequirementHandler ConfigureHandler(JwtBearerOptions jwtOptions)
+    private static RequireClientCredentialsRequirementHandler ConfigureHandler(JwtBearerOptions jwtOptions)
     {
         var jwtOptionsMonitor = A.Fake<IOptionsMonitor<JwtBearerOptions>>();
         A.CallTo(() => jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme)).Returns(jwtOptions);
@@ -105,15 +95,15 @@ public class RequireClientCredentialsRequirementHandlerTests
         return new RequireClientCredentialsRequirementHandler(jwtOptionsMonitor);
     }
 
-    private AuthorizationHandlerContext ConfigureHandlerContext(List<Claim> claims, List<string> requiredPermissions)
+    private static AuthorizationHandlerContext ConfigureHandlerContext(List<Claim> claims, string requiredPermission)
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        var requiredPermissionsAttribute = new RequireClientCredentialsAttribute(requiredPermissions.First(), requiredPermissions.Skip(1).ToArray());
+        var requireClientCredentialsAttribute = new RequireClientCredentialsAttribute(requiredPermission);
 
         var httpContext = new DefaultHttpContext();
         httpContext.Features.Set<IEndpointFeature>(new EndpointFeature
         {
-            Endpoint = new Endpoint(default, new EndpointMetadataCollection(requiredPermissionsAttribute), default),
+            Endpoint = new Endpoint(requestDelegate: default, new EndpointMetadataCollection(requireClientCredentialsAttribute), displayName: default),
         });
 
         return new AuthorizationHandlerContext(new[] { new RequireClientCredentialsRequirement() }, user, httpContext);

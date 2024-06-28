@@ -37,9 +37,8 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
             return Task.CompletedTask;    
         }
         
-        var hasRequiredPermissions = HasOneOfScope(context.User, requiredScopes);
-
-        if (hasRequiredPermissions)
+        var hasRequiredScope = HasRequiredScope(context.User, requiredScopes);
+        if (hasRequiredScope)
         {
             context.Succeed(requirement);
         }
@@ -47,7 +46,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         return Task.CompletedTask;
     }
 
-    private bool TryGetRequiredScopes(AuthorizationHandlerContext context, [NotNullWhen(true)] out HashSet<string>? requiredScopes)
+    private bool TryGetRequiredScopes(AuthorizationHandlerContext context, [NotNullWhen(true)] out string[]? requiredScopes)
     {
         requiredScopes = null;
         
@@ -58,14 +57,13 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
             _ => null,
         };
 
-        var requiredPermissions = endpoint?.Metadata.GetMetadata<RequireClientCredentialsAttribute>()?.RequiredPermissions;
-
-        if (requiredPermissions == null)
+        var requiredPermission = endpoint?.Metadata.GetMetadata<RequireClientCredentialsAttribute>()?.RequiredPermission;
+        if (requiredPermission == null)
         {
             return false;
         }
 
-        requiredScopes = requiredPermissions.SelectMany(this.FormatScopes).ToHashSet(StringComparer.Ordinal);
+        requiredScopes = this.FormatScopes(requiredPermission);
         return true;
     }
 
@@ -74,10 +72,10 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
         return [requiredPermission, $"{this._jwtOptions.Audience}:{requiredPermission}"];
     }
     
-    private static bool HasOneOfScope(ClaimsPrincipal claimsPrincipal, HashSet<string> requiredScopes)
+    private static bool HasRequiredScope(ClaimsPrincipal claimsPrincipal, string[] requiredScopes)
     {
         return claimsPrincipal.Claims
-            .Where(claim => ScopeClaimTypes.Contains(claim.Type))
-            .Any(claim => requiredScopes.Contains(claim.Value));
+            .Where(x => ScopeClaimTypes.Contains(x.Type))
+            .Any(x => requiredScopes.Contains(x.Value));
     }
 }

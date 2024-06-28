@@ -35,6 +35,7 @@ The **server-side library** includes:
 * JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
 * Authorization attribute and policy to easily enforce granular scopes on your endpoints.
 * Authorization attribute and policy to easily enforce classic Workleap permissions (read, write, admin).
+* Support of OpenAPI security definition and security requirement generation when using Swashbuckle.
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
 * Support for ASP.NET Core 6.0 and later.
 
@@ -115,11 +116,10 @@ _This client-side library is based on [Duende.AccessTokenManagement](https://git
 
 ### Server-side library
 
-The server-side library add the RequireClientCredentials attributes that simplify the use of the client credentials flow in your ASP.NET Core application:
+The server-side library add the `RequireClientCredentials` attribute that simplify the use of the client credentials flow in your ASP.NET Core application:
 - Simply specify the required permissions in the attribute (e.g: `[RequireClientCredentials("read")`]
 - Support multiple claims types (e.g: `scope`, `scp`, `http://schemas.microsoft.com/identity/claims/scope`)
 - Support multiple claims format (e.g: `read`, `{Audience}:read`)
-
 
 Install the package [Workleap.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/Workleap.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
 
@@ -146,10 +146,9 @@ For instance, the example above works well with this `appsettings.json`:
 }
 ```
 
-Next protect your endpoints with the `RequireClientCredentials` attribute:
+Next, protect your endpoints with the `RequireClientCredentials` attribute:
 
 ```csharp
-
 // When using Controlled-Based
 [HttpGet]
 [Route("weather")]
@@ -158,18 +157,17 @@ public async Task<IActionResult> GetWeather()
 {...}
 
 // When using Minimal APIs
-app.MapGet("/weather", () => {...}).RequirePermission("read");
+app.MapGet("/weather", () => {...}).RequireClientCredentials("read");
 ```
 
 Next, register the authorization services which all the required authorization policies:
 
 ```csharp
 builder.Services
-    .AddClientCredentialsAuthorization()
-    ;
+    .AddClientCredentialsAuthorization();
 ```
 
-Finally, register the authentication and authorization middlewares in your ASP.NET Core app and decorate your endpoints with the `AuthorizeAttribute`:
+Finally, register the authentication and authorization middlewares in your ASP.NET Core app.
 
 ```csharp
 var app = builder.Build();
@@ -178,13 +176,54 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Minimal APIs
-app.MapGet("/hello-world", () => "Hello World!").RequireAuthorization("my-policy");
+// [...] Map your endpoints
+```
 
-// Controller-style
-[Authorize("my-policy")]
-[HttpGet("hello-world")]
-public IActionResult HelloWorld() => this.Ok("Hello world");
+#### OpenAPI integration
+
+If you are using [Swashbuckle](https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger) to document your API, the `[RequireClientCredentials]` attribute will automatically populate the security definitions and requirements in the OpenAPI specification. For minimal APIs, there is a corresponding `RequireClientCredentials()` method. 
+
+For example:
+
+```csharp
+// Controlled-based approach
+[HttpGet]
+[Route("weather")]
+[RequireClientCredentials("read")]
+public async Task<IActionResult> GetWeather()
+{ /* ... */ }
+
+// Minimal APIs
+app.MapGet("/weather", () => { /* ... */ }).RequireClientCredentials("read");
+```
+
+Will generate this:
+
+```yaml
+paths:
+  /weather:
+    get:
+      summary: 'Required scope: read.'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - clientcredentials:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read # Based on the provided JwtBearerOptions.Audience
+components:
+  securitySchemes:
+    clientcredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://localhost:9020/oauth2/token # Based on provided ClientCredentials.Authority
+          scopes:
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client ID
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read: Request permission 'read' for specified client ID
 ```
 
 
