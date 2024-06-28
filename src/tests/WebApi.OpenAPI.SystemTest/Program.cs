@@ -1,5 +1,5 @@
 using WebApi.OpenAPI.SystemTest;
-using WebApi.OpenAPI.SystemTest.SecurityRequirement;
+using WebApi.OpenAPI.SystemTest.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 

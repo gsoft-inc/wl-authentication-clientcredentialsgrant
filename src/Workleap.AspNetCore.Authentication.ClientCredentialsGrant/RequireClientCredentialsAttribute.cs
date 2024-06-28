@@ -38,20 +38,19 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
     /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
     /// - It will accept those value format: `read`, `{Audience}:read`
     /// </summary>
-    /// <param name="requiredPermission">Permissions accepted. The users only needs to have one of those permissions.</param>
+    /// <param name="requiredPermission">The required permission expected to be in the scope claims.</param>
     /// <example>
     /// <code>
     /// [RequireClientCredentials("invoices.read")]
     /// </code>
     /// </example>
-    [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "The arguments are transformed.")]
-    public RequireClientCredentialsAttribute(string requiredPermission, params string[] additionalRequiredPermissions)
+    public RequireClientCredentialsAttribute(string requiredPermission)
     {
-        this.Policy = ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy;
-        this.RequiredPermissions = [requiredPermission, ..additionalRequiredPermissions];
+        this.Policy = ClientCredentialsDefaults.RequireClientCredentialsPolicyName;
+        this.RequiredPermission = requiredPermission ?? throw new ArgumentNullException(nameof(requiredPermission));
     }
 
-    internal HashSet<string> RequiredPermissions { get; }
+    public string RequiredPermission { get; }
 }
 
 public static class RequireClientCredentialsExtensions
@@ -61,19 +60,19 @@ public static class RequireClientCredentialsExtensions
     /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
     /// - It will accept those value format: `read`, `{Audience}:read`
     /// </summary>
-    /// <param name="requiredPermission">Permissions accepted. The users only needs to have one of those permissions.</param>
     /// <remarks>
-    /// Used in Minimal API.
+    /// Used in minimal APIs.
     /// </remarks>
     /// <example>
+    /// <param name="requiredPermission">The required permission expected to be in the claims.</param>
     /// <code>
-    /// app.MapGet("/weather", () => {...}).RequireClientCredentials("read");
+    /// app.MapGet("/weather", () => { /* ... */ }).RequireClientCredentials("read");
     /// </code>
     /// </example>
     public static TBuilder RequireClientCredentials<TBuilder>(
-        this TBuilder endpointConventionBuilder, string requiredPermission, params string[] additionalRequiredPermissions)
+        this TBuilder endpointConventionBuilder, string requiredPermission)
         where TBuilder : IEndpointConventionBuilder
     {
-        return endpointConventionBuilder.WithMetadata(new RequireClientCredentialsAttribute(requiredPermission, additionalRequiredPermissions));
+        return endpointConventionBuilder.WithMetadata(new RequireClientCredentialsAttribute(requiredPermission));
     }
 }

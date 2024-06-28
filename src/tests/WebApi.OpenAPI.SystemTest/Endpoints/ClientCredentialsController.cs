@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-namespace WebApi.OpenAPI.SystemTest.SecurityRequirement;
+namespace WebApi.OpenAPI.SystemTest.Endpoints;
 
 [ApiController]
 public class ClientCredentialsController : ControllerBase
 {
     [HttpPost]
     [Route("/controller-allow-anonymous-override")]
-    [SwaggerOperation(Summary = "Given endpoint with [RequireClientCredentials] and [AllowAnonymous], then OpenAPI should contains no permission.")]
+    [SwaggerOperation(Summary = "This controller method decorated with both AllowAnonymous and RequireClientCredentials should not require any permissions.")]
     [RequireClientCredentials("cocktail.drink")]
     [AllowAnonymous]
     public IActionResult SeeCocktail(int id)
@@ -19,9 +19,9 @@ public class ClientCredentialsController : ControllerBase
     }
     
     [HttpPost]
-    [Route("/controller-multiple-permissions")]
-    [SwaggerOperation(Summary = "Given endpoint with [RequireClientCredentials], then OpenAPI should contains permission.")]
-    [RequireClientCredentials("cocktail.buy", "cocktail.drink")]
+    [Route("/controller-requires-permission")]
+    [SwaggerOperation(Summary = "This controller method should require the cocktail.buy permission.")]
+    [RequireClientCredentials("cocktail.buy")]
     public IActionResult BuyCocktail(int id)
     {
         return this.Ok("Hello World!");

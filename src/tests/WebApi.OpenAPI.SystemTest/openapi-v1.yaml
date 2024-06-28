@@ -7,7 +7,7 @@ paths:
     get:
       tags:
         - ClientCredentials
-      summary: 'Given a minimal api RequirePermission with additional permissions, then should describe multiple permissions. Required permissions: cocktail.make, cocktail.buy.'
+      summary: 'This minimal API should require the cocktail.make permission. Required permission: cocktail.make.'
       responses:
         '200':
           description: OK
@@ -22,12 +22,11 @@ paths:
       security:
         - clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
   /controller-allow-anonymous-override:
     post:
       tags:
         - ClientCredentials
-      summary: 'Given endpoint with [RequireClientCredentials] and [AllowAnonymous], then OpenAPI should contains no permission.'
+      summary: This controller method decorated with both AllowAnonymous and RequireClientCredentials should not require any permissions.
       parameters:
         - name: id
           in: query
@@ -37,11 +36,11 @@ paths:
       responses:
         '200':
           description: OK
-  /controller-multiple-permissions:
+  /controller-requires-permission:
     post:
       tags:
         - ClientCredentials
-      summary: 'Given endpoint with [RequireClientCredentials], then OpenAPI should contains permission. Required permissions: cocktail.buy, cocktail.drink.'
+      summary: 'This controller method should require the cocktail.buy permission. Required permission: cocktail.buy.'
       parameters:
         - name: id
           in: query
@@ -58,7 +57,6 @@ paths:
       security:
         - clientcredentials:
             - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink
 components:
   securitySchemes:
     clientcredentials:
@@ -70,4 +68,3 @@ components:
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client ID
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.make: Request permission 'cocktail.make' for specified client ID
             target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.buy: Request permission 'cocktail.buy' for specified client ID
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:cocktail.drink: Request permission 'cocktail.drink' for specified client ID

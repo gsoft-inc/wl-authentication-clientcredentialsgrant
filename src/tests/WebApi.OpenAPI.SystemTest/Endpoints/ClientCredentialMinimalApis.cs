@@ -1,14 +1,14 @@
 ﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
-namespace WebApi.OpenAPI.SystemTest.SecurityRequirement;
+namespace WebApi.OpenAPI.SystemTest.Endpoints;
 
 public static class ClientCredentialMinimalApis
 {
     public static void MapMinimalEndpoint(this WebApplication app)
     {
         app.MapGet("/minimal-api", () => "Hello World")
-            .WithSummary("Given a minimal api RequirePermission with additional permissions, then should describe multiple permissions.")
-            .RequireClientCredentials("cocktail.make", "cocktail.buy")
+            .WithSummary("This minimal API should require the cocktail.make permission.")
+            .RequireClientCredentials("cocktail.make")
             .WithTags("ClientCredentials")
             .WithOpenApi();
     }

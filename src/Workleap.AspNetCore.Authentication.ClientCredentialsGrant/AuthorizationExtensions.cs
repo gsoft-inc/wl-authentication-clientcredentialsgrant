@@ -51,7 +51,7 @@ public static class AuthorizationExtensions
                         .RequireClaim("scope", $"{jwtOptions.Audience}:{ScopeClaimMapping[ClientCredentialsScope.Admin]}"));
                 
                 authorizationOptions.AddPolicy(
-                    ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy,
+                    ClientCredentialsDefaults.RequireClientCredentialsPolicyName,
                     policy => policy
                         .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()

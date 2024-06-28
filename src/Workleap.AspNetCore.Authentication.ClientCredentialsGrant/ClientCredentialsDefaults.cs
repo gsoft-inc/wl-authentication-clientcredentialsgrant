@@ -6,7 +6,7 @@ public static class ClientCredentialsDefaults
 
     internal const string AuthenticationType = "ClientCredentials";
     
-    internal const string AuthorizationRequirePermissionsPolicy = "ClientCredentialRequirePermissions";
+    internal const string RequireClientCredentialsPolicyName = "ClientCredentialsPolicy";
 
     internal const string AuthorizationReadPolicy = "ClientCredentialsRead";
 
@@ -14,5 +14,5 @@ public static class ClientCredentialsDefaults
 
     internal const string AuthorizationAdminPolicy = "ClientCredentialsAdmin";
 
-    internal static readonly string OpenApiSecurityDefinitionId = AuthenticationScheme.ToLowerInvariant();
+    internal const string OpenApiSecurityDefinitionId = "clientcredentials";
 }

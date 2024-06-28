@@ -13,8 +13,8 @@ internal static class SwaggerUtils
 
         if (apiDescription.TryGetMethodInfo(out var methodInfo))
         {
-            var hasAllowAnonymous = methodInfo.GetCustomAttributes<AllowAnonymousAttribute>(inherit: true).Any();
-            if (hasAllowAnonymous)
+            var isAnonymousEndpoint = methodInfo.GetCustomAttributes<AllowAnonymousAttribute>(inherit: true).Any();
+            if (isAnonymousEndpoint)
             {
                 return [];
             }
@@ -26,7 +26,7 @@ internal static class SwaggerUtils
         // Minimal APIs endpoint metadata (empty for controller actions)
         attributes.AddRange(apiDescription.ActionDescriptor.EndpointMetadata.OfType<RequireClientCredentialsAttribute>());
 
-        return attributes.SelectMany(attribute => attribute.RequiredPermissions);
+        return attributes.Select(x => x.RequiredPermission);
     }
 
     // It assumes the identity provider is supporting the target-entity scope format
