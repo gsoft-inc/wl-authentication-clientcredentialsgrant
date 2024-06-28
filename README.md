@@ -35,7 +35,7 @@ The **server-side library** includes:
 * JWT authentication using the [Microsoft.AspNetCore.Authentication.JwtBearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) library.
 * Authorization attribute and policy to easily enforce granular scopes on your endpoints.
 * Authorization attribute and policy to easily enforce classic Workleap permissions (read, write, admin).
-* Support of OpenAPI Security Definition and Security Requirement generation when using Swashbuckle.
+* Support of OpenAPI security definition and security requirement generation when using Swashbuckle.
 * Non-intrusive: default policies must be explicitly used, and the default authentication scheme can be modified.
 * Support for ASP.NET Core 6.0 and later.
 
@@ -159,7 +159,7 @@ public async Task<IActionResult> GetWeather()
 {...}
 
 // When using Minimal APIs
-app.MapGet("/weather", () => {...}).RequirePermission("read");
+app.MapGet("/weather", () => {...}).RequireClientCredentials("read");
 ```
 
 Next, register the authorization services which all the required authorization policies:
@@ -189,21 +189,20 @@ public IActionResult HelloWorld() => this.Ok("Hello world");
 
 #### OpenAPI integration
 
-If you are using Swashbuckle to generate your OpenAPI documentation, if you are using the  `RequireClientCredentials` attribute it will automatically populate the security definitions and requirements in the OpenAPI document.
+If you are using [Swashbuckle](https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger) to document your API, the `[RequireClientCredentials]` attribute will automatically populate the security definitions and requirements in the OpenAPI specification. For minimal APIs, there is a corresponding `RequireClientCredentials()` method. 
 
 For example:
 
 ```csharp
-
-// When using Controlled-Based
+// Controlled-based approach
 [HttpGet]
 [Route("weather")]
 [RequireClientCredentials("read")]
 public async Task<IActionResult> GetWeather()
-{...}
+{ /* ... */ }
 
-// When using Minimal APIs
-app.MapGet("/weather", () => {...}).RequirePermission("read");
+// Minimal APIs
+app.MapGet("/weather", () => { /* ... */ }).RequireClientCredentials("read");
 ```
 
 Will generate this:
@@ -221,24 +220,19 @@ paths:
         '403':
           description: Forbidden
       security:
-        - oauth2-clientcredentials:
-            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read /* Based on ClientCredentials options: Audience */
+        - clientcredentials:
+            - target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read # Based on the provided JwtBearerOptions.Audience
 components:
   securitySchemes:
-    oauth2-clientcredentials:
+    clientcredentials:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: https://localhost:9020/oauth2/token /* Based on ClientCredentials options: Authority */
+          tokenUrl: https://localhost:9020/oauth2/token # Based on provided ClientCredentials.Authority
           scopes:
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client_id
-            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:Request this permission read for specified client_id: read
-
-
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f: Request all permissions for specified client ID
+            target-entity:b108bbc9-538e-403b-9faf-e5cd874eb17f:read: Request permission 'read' for specified client ID
 ```
-
-
-```csharp
 
 
 ## Building, releasing and versioning
