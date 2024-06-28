@@ -116,11 +116,10 @@ _This client-side library is based on [Duende.AccessTokenManagement](https://git
 
 ### Server-side library
 
-The server-side library add the RequireClientCredentials attributes that simplify the use of the client credentials flow in your ASP.NET Core application:
+The server-side library add the `RequireClientCredentials` attribute that simplify the use of the client credentials flow in your ASP.NET Core application:
 - Simply specify the required permissions in the attribute (e.g: `[RequireClientCredentials("read")`]
 - Support multiple claims types (e.g: `scope`, `scp`, `http://schemas.microsoft.com/identity/claims/scope`)
 - Support multiple claims format (e.g: `read`, `{Audience}:read`)
-
 
 Install the package [Workleap.AspNetCore.Authentication.ClientCredentialsGrant](https://www.nuget.org/packages/Workleap.AspNetCore.Authentication.ClientCredentialsGrant/) in your server-side ASP.NET Core application and register the authentication services:
 
@@ -147,10 +146,9 @@ For instance, the example above works well with this `appsettings.json`:
 }
 ```
 
-Next protect your endpoints with the `RequireClientCredentials` attribute:
+Next, protect your endpoints with the `RequireClientCredentials` attribute:
 
 ```csharp
-
 // When using Controlled-Based
 [HttpGet]
 [Route("weather")]
@@ -169,7 +167,7 @@ builder.Services
     .AddClientCredentialsAuthorization();
 ```
 
-Finally, register the authentication and authorization middlewares in your ASP.NET Core app and decorate your endpoints with the `AuthorizeAttribute`:
+Finally, register the authentication and authorization middlewares in your ASP.NET Core app.
 
 ```csharp
 var app = builder.Build();
@@ -178,13 +176,7 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Minimal APIs
-app.MapGet("/hello-world", () => "Hello World!").RequireAuthorization("my-policy");
-
-// Controller-style
-[Authorize("my-policy")]
-[HttpGet("hello-world")]
-public IActionResult HelloWorld() => this.Ok("Hello world");
+// [...] Map your endpoints
 ```
 
 #### OpenAPI integration
