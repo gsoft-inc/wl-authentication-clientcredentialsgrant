@@ -11,8 +11,7 @@ public class RequireClientCredentialsAttributeTests
     public void GivenAllPossibleClassicScopes_WhenCreate_ThenExpectedPermission(ClientCredentialsScope scope, string expectedPermission)
     {
         var attribute = new RequireClientCredentialsAttribute(scope);
-        var permission = Assert.Single(attribute.RequiredPermissions);
-        Assert.Equal(expectedPermission, permission);
+        Assert.Equal(expectedPermission, attribute.RequiredPermission);
     }
 
     [Fact]
@@ -27,25 +26,16 @@ public class RequireClientCredentialsAttributeTests
     {
         var expectedPermission = "cocktail.drink";
         var attribute = new RequireClientCredentialsAttribute(expectedPermission);
-        var permission = Assert.Single(attribute.RequiredPermissions);
-        Assert.Equal(expectedPermission, permission);
-    }
-    
-    [Fact]
-    public void GivenMultiplePermission_WhenCreate_ThenSamePermissions()
-    {
-        var expectedPermissions = new[] { "cocktail.drink", "cocktail.make", "cocktail.buy" };
-        var attribute = new RequireClientCredentialsAttribute(expectedPermissions.First(), expectedPermissions.Skip(1).ToArray());
-        Assert.True(attribute.RequiredPermissions.SetEquals(expectedPermissions));
+        Assert.Equal(expectedPermission, attribute.RequiredPermission);
     }
 
     private sealed class ClientCredentialsScopeData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { ClientCredentialsScope.Read, "read" };
-            yield return new object[] { ClientCredentialsScope.Write, "write" };
-            yield return new object[] { ClientCredentialsScope.Admin, "admin" };
+            yield return [ClientCredentialsScope.Read, "read"];
+            yield return [ClientCredentialsScope.Write, "write"];
+            yield return [ClientCredentialsScope.Admin, "admin"];
         }
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

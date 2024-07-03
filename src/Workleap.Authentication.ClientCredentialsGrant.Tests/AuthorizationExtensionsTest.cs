@@ -51,8 +51,8 @@ public class AuthorizationExtensionsTest
         var adminPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationAdminPolicy);
         ValidateClassicPolicy(adminPolicy, ClientCredentialsScope.Admin);
         
-        var requirePermissionPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy);
-        ValidateRequirePermissionPolicy(requirePermissionPolicy);
+        var requireClientCredentialsPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.RequireClientCredentialsPolicyName);
+        ValidateRequireClientCredentialsPolicy(requireClientCredentialsPolicy);
     }
     
     [Fact]
@@ -74,19 +74,11 @@ public class AuthorizationExtensionsTest
     private static void ValidateClassicPolicy(AuthorizationPolicy? policy, ClientCredentialsScope scope)
     {
         Assert.NotNull(policy);
-        Assert.Collection(
-            policy.AuthenticationSchemes,
-            scheme =>
-            {
-                Assert.Equal(ClientCredentialsDefaults.AuthenticationScheme, scheme);
-            });
+        Assert.Single(policy.AuthenticationSchemes, ClientCredentialsDefaults.AuthenticationScheme);
         Assert.Equal(2, policy.Requirements.Count);
         Assert.Collection(
             policy.Requirements,
-            x =>
-            {
-                Assert.Equal(typeof(DenyAnonymousAuthorizationRequirement), x.GetType());
-            },
+            x => Assert.Equal(typeof(DenyAnonymousAuthorizationRequirement), x.GetType()),
             x =>
             {
                 Assert.Equal(typeof(ClaimsAuthorizationRequirement), x.GetType());
@@ -100,24 +92,13 @@ public class AuthorizationExtensionsTest
             });
     }
     
-    private static void ValidateRequirePermissionPolicy(AuthorizationPolicy? policy)
+    private static void ValidateRequireClientCredentialsPolicy(AuthorizationPolicy? policy)
     {
         Assert.NotNull(policy);
-        Assert.Collection(
-            policy.AuthenticationSchemes,
-            scheme =>
-            {
-                Assert.Equal(ClientCredentialsDefaults.AuthenticationScheme, scheme);
-            });
+        Assert.Single(policy.AuthenticationSchemes, ClientCredentialsDefaults.AuthenticationScheme);
         Assert.Collection(
             policy.Requirements,
-            x =>
-            {
-                Assert.Equal(typeof(DenyAnonymousAuthorizationRequirement), x.GetType());
-            },
-            x =>
-            {
-                Assert.Equal(typeof(RequireClientCredentialsRequirement), x.GetType());
-            });
+            x => Assert.Equal(typeof(DenyAnonymousAuthorizationRequirement), x.GetType()),
+            x => Assert.Equal(typeof(RequireClientCredentialsRequirement), x.GetType()));
     }
 }

@@ -16,6 +16,9 @@ public static class AuthorizationExtensions
         [ClientCredentialsScope.Admin] = "admin",
     };
 
+    /// <summary>
+    /// Register the client credentials authorization policies.
+    /// </summary>
     public static IServiceCollection AddClientCredentialsAuthorization(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -48,7 +51,7 @@ public static class AuthorizationExtensions
                         .RequireClaim("scope", $"{jwtOptions.Audience}:{ScopeClaimMapping[ClientCredentialsScope.Admin]}"));
                 
                 authorizationOptions.AddPolicy(
-                    ClientCredentialsDefaults.AuthorizationRequirePermissionsPolicy,
+                    ClientCredentialsDefaults.RequireClientCredentialsPolicyName,
                     policy => policy
                         .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()

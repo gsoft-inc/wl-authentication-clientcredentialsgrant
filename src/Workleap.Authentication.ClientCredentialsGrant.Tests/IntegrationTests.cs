@@ -115,8 +115,8 @@ public class IntegrationTests
         webApp.MapGet("/public", () => "This endpoint is public").RequireHost("invoice-app.local");
         webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationReadPolicy).RequireHost("invoice-app.local");
         webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationWritePolicy).RequireHost("invoice-app.local");
-        webApp.MapGet("/read-invoices-granular", () => "This protected endpoint is for reading invoices").RequirePermission("read").RequireHost("invoice-app.local");
-        webApp.MapGet("/pay-invoices-granular", () => "This protected endpoint is for paying invoices").RequirePermission("pay").RequireHost("invoice-app.local");
+        webApp.MapGet("/read-invoices-granular", () => "This protected endpoint is for reading invoices").RequireClientCredentials("read").RequireHost("invoice-app.local");
+        webApp.MapGet("/pay-invoices-granular", () => "This protected endpoint is for paying invoices").RequireClientCredentials("pay").RequireHost("invoice-app.local");
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 

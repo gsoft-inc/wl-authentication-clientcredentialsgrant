@@ -6,11 +6,13 @@ public static class ClientCredentialsDefaults
 
     internal const string AuthenticationType = "ClientCredentials";
     
-    internal const string AuthorizationRequirePermissionsPolicy = "ClientCredentialRequirePermissions";
+    internal const string RequireClientCredentialsPolicyName = "ClientCredentialsPolicy";
 
     internal const string AuthorizationReadPolicy = "ClientCredentialsRead";
 
     internal const string AuthorizationWritePolicy = "ClientCredentialsWrite";
 
     internal const string AuthorizationAdminPolicy = "ClientCredentialsAdmin";
+
+    internal const string OpenApiSecurityDefinitionId = "clientcredentials";
 }
