@@ -17,7 +17,7 @@ public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
     {
         if (!this._policyScopeMapping.TryGetValue(scope, out var policy))
         {
-            throw new ArgumentException($"${scope} is not an valid scope value");
+            throw new ArgumentException($"'{scope}' is not an valid scope value");
         }
 
         this.Scope = scope;
