@@ -1,4 +1,4 @@
-﻿using CliWrap;
+using CliWrap;
 using Meziantou.Framework;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests.OpenAPI;
@@ -9,7 +9,7 @@ public class OpenApiSecurityDescriptionTests
     public async Task Given_API_With_Client_Credentials_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
     {
         var solutionPath = GetSolutionPath();
-        
+
         var testsFolder = Path.Combine(solutionPath, "tests");
         var projectFolder = Path.Combine(testsFolder, "WebApi.OpenAPI.SystemTest");
         var generatedFilePath = Path.Combine(projectFolder, "openapi-v1.yaml");
@@ -31,12 +31,12 @@ public class OpenApiSecurityDescriptionTests
 
         Assert.Equal(expectedFileContent, generatedFileContent, ignoreLineEndingDifferences: true);
     }
-    
+
     private static string GetSolutionPath()
     {
         return GetGitRoot() / "src";
     }
-    
+
     private static FullPath GetGitRoot()
     {
         if (FullPath.CurrentDirectory().TryFindFirstAncestorOrSelf(current => Directory.Exists(current / ".git"), out var root))

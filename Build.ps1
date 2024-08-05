@@ -20,6 +20,11 @@ Process {
         Push-Location $workingDir
         Remove-Item $outputDir -Force -Recurse -ErrorAction SilentlyContinue
     
+	    # Duende.IdentityServer fails signature validation
+        # https://github.com/DuendeSoftware/Support/issues/1352
+        # Note that the new certificate should be included in the next version of the .NET SDK (release on 2024/08/13)
+	    $env:DOTNET_NUGET_SIGNATURE_VERIFICATION="false"
+
         Exec { & dotnet clean -c Release }
         Exec { & dotnet build -c Release }
         Exec { & dotnet test  -c Release --no-build --results-directory "$outputDir" --no-restore -l "trx" -l "console;verbosity=detailed" }

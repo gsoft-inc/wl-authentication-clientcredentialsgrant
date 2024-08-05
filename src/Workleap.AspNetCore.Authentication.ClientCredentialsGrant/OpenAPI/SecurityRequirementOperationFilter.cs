@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -29,13 +29,13 @@ internal sealed class SecurityRequirementOperationFilter(IOptionsMonitor<JwtBear
         this.AddOperationSecurityReference(operation, attributes);
         AppendScopeToOperationSummary(operation, attributes);
     }
-    
+
     private static void AddAuthenticationAndAuthorizationErrorResponse(OpenApiOperation operation)
     {
         operation.Responses.TryAdd(StatusCodes.Status401Unauthorized.ToString(CultureInfo.InvariantCulture), new OpenApiResponse { Description = ReasonPhrases.GetReasonPhrase(StatusCodes.Status401Unauthorized) });
         operation.Responses.TryAdd(StatusCodes.Status403Forbidden.ToString(CultureInfo.InvariantCulture), new OpenApiResponse { Description = ReasonPhrases.GetReasonPhrase(StatusCodes.Status403Forbidden) });
     }
-    
+
     private void AddOperationSecurityReference(OpenApiOperation operation, HashSet<string> permissions)
     {
         var isAlreadyReferencingSecurityDefinition = operation.Security.Any(requirement => requirement.Keys.Any(key => key.Reference?.Id == ClientCredentialsDefaults.OpenApiSecurityDefinitionId));
@@ -43,7 +43,7 @@ internal sealed class SecurityRequirementOperationFilter(IOptionsMonitor<JwtBear
         {
             return;
         }
-        
+
         var securityScheme = new OpenApiSecurityScheme
         {
             Reference = new OpenApiReference
@@ -65,24 +65,24 @@ internal sealed class SecurityRequirementOperationFilter(IOptionsMonitor<JwtBear
         requireScopeSummary.Append(scopes.Count == 1 ? "Required permission: " : "Required permissions: ");
         requireScopeSummary.Append(string.Join(", ", scopes));
         requireScopeSummary.Append('.');
-        
+
         var isRequireScopeSummaryPresent = operation.Summary?.Contains(requireScopeSummary.ToString()) ?? false;
         if (isRequireScopeSummaryPresent)
         {
             return;
         }
-        
+
         var summary = new StringBuilder(operation.Summary?.TrimEnd('.'));
         if (summary.Length > 0)
         {
             summary.Append(". ");
         }
-        
+
         summary.Append(requireScopeSummary);
 
         operation.Summary = summary.ToString();
     }
-    
+
     private IEnumerable<string> ExtractScopes(HashSet<string> permissions)
     {
         foreach (var permission in permissions)

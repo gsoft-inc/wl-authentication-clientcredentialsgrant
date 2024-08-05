@@ -54,7 +54,7 @@ public static class AuthenticationBuilderExtensions
             {
                 options.OperationFilter<SecurityRequirementOperationFilter>();
             }
-            
+
             if (options.DocumentFilterDescriptors.All(x => x.Type != typeof(SecurityDefinitionDocumentFilter)))
             {
                 options.DocumentFilter<SecurityDefinitionDocumentFilter>();

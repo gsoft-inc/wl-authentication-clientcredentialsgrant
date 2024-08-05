@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -29,14 +29,14 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
     {
         this._jwtOptions = jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme);
     }
-    
+
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RequireClientCredentialsRequirement requirement)
     {
         if (!this.TryGetRequiredScopes(context, out var requiredScopes))
         {
-            return Task.CompletedTask;    
+            return Task.CompletedTask;
         }
-        
+
         var hasRequiredScope = HasRequiredScope(context.User, requiredScopes);
         if (hasRequiredScope)
         {
@@ -49,7 +49,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
     private bool TryGetRequiredScopes(AuthorizationHandlerContext context, [NotNullWhen(true)] out string[]? requiredScopes)
     {
         requiredScopes = null;
-        
+
         var endpoint = context.Resource switch
         {
             HttpContext httpContext => httpContext.GetEndpoint(),
@@ -71,7 +71,7 @@ internal class RequireClientCredentialsRequirementHandler : AuthorizationHandler
     {
         return [requiredPermission, $"{this._jwtOptions.Audience}:{requiredPermission}"];
     }
-    
+
     private static bool HasRequiredScope(ClaimsPrincipal claimsPrincipal, string[] requiredScopes)
     {
         return claimsPrincipal.Claims
