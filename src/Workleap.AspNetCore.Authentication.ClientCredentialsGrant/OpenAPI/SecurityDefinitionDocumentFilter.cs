@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -15,7 +15,7 @@ internal sealed class SecurityDefinitionDocumentFilter(IOptionsMonitor<JwtBearer
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         var apiPermissions = context.ApiDescriptions.SelectMany(SwaggerUtils.GetRequiredPermissions).ToHashSet(StringComparer.Ordinal);
-        
+
         swaggerDoc.Components.SecuritySchemes.Add(
             ClientCredentialsDefaults.OpenApiSecurityDefinitionId,
             new OpenApiSecurityScheme
@@ -31,19 +31,19 @@ internal sealed class SecurityDefinitionDocumentFilter(IOptionsMonitor<JwtBearer
                 },
             });
     }
-    
+
     private Uri GetTokenUrl()
     {
         // Authority has already been validated as an absolute URL
         var authority = this._jwtOptions.Authority!.TrimEnd('/');
         return new Uri($"{authority}/oauth2/token", UriKind.Absolute);
     }
-    
+
     private Dictionary<string, string> ExtractScopes(IEnumerable<string> permissions)
     {
         // Audience has already been validated as non-empty
         var audience = this._jwtOptions.Audience!;
-        
+
         var scopes = new Dictionary<string, string>
         {
             [SwaggerUtils.GetScopeForAnyPermission(audience)] = "Request all permissions for specified client ID",

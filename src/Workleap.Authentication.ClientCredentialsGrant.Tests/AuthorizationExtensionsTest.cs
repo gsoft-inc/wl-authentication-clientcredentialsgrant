@@ -1,4 +1,4 @@
-﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
+using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -50,11 +50,11 @@ public class AuthorizationExtensionsTest
 
         var adminPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.AuthorizationAdminPolicy);
         ValidateClassicPolicy(adminPolicy, ClientCredentialsScope.Admin);
-        
+
         var requireClientCredentialsPolicy = authorizationValues.GetPolicy(ClientCredentialsDefaults.RequireClientCredentialsPolicyName);
         ValidateRequireClientCredentialsPolicy(requireClientCredentialsPolicy);
     }
-    
+
     [Fact]
     public async Task GivenIServiceCollection_WhenAddClientCredentialsAuthorization_ThenRequirementHandlerRegistered()
     {
@@ -91,7 +91,7 @@ public class AuthorizationExtensionsTest
                 Assert.Equal($"{DefaultAudience}:{AuthorizationExtensions.ScopeClaimMapping[scope]}", allowedScope);
             });
     }
-    
+
     private static void ValidateRequireClientCredentialsPolicy(AuthorizationPolicy? policy)
     {
         Assert.NotNull(policy);

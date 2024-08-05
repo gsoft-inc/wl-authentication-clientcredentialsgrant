@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -18,7 +18,7 @@ internal static class SwaggerUtils
             {
                 return [];
             }
-            
+
             // Controllers - Attributes on the action method (empty for minimal APIs)
             attributes.AddRange(methodInfo.GetCustomAttributes<RequireClientCredentialsAttribute>(inherit: true));
         }
@@ -34,7 +34,7 @@ internal static class SwaggerUtils
     {
         return $"target-entity:{audience}:{permission}";
     }
-    
+
     public static string GetScopeForAnyPermission(string audience)
     {
         return $"target-entity:{audience}";

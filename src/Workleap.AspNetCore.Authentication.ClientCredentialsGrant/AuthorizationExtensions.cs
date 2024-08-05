@@ -1,4 +1,4 @@
-﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
+using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -49,7 +49,7 @@ public static class AuthorizationExtensions
                         .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()
                         .RequireClaim("scope", $"{jwtOptions.Audience}:{ScopeClaimMapping[ClientCredentialsScope.Admin]}"));
-                
+
                 authorizationOptions.AddPolicy(
                     ClientCredentialsDefaults.RequireClientCredentialsPolicyName,
                     policy => policy
@@ -57,7 +57,7 @@ public static class AuthorizationExtensions
                         .RequireAuthenticatedUser()
                         .AddRequirements(new RequireClientCredentialsRequirement()));
             });
-        
+
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IAuthorizationHandler, RequireClientCredentialsRequirementHandler>());
 
         return services;
