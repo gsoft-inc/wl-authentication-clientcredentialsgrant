@@ -75,8 +75,6 @@ public class RequireClientCredentialsRequirementHandlerTests
             new("scope", "otherPermission"),
         };
 
-        var requiredPermission = "randomPermission";
-
         var context = ConfigureHandlerContext(userClaims, "randomPermission");
         var handler = ConfigureHandler(new JwtBearerOptions());
 
