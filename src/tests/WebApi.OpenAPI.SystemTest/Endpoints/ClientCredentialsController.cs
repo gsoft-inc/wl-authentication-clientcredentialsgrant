@@ -17,7 +17,7 @@ public class ClientCredentialsController : ControllerBase
     {
         return this.Ok("Hello World!");
     }
-    
+
     [HttpPost]
     [Route("/controller-requires-permission")]
     [SwaggerOperation(Summary = "This controller method should require the cocktail.buy permission.")]

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using Microsoft.AspNetCore.Authorization;
 using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
@@ -20,7 +20,7 @@ public class RequireClientCredentialsAttributeTests
         var scope = (ClientCredentialsScope)999;
         Assert.Throws<ArgumentOutOfRangeException>(() => new RequireClientCredentialsAttribute(scope));
     }
-    
+
     [Fact]
     public void GivenSinglePermission_WhenCreate_ThenSamePermission()
     {

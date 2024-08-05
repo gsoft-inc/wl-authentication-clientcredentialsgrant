@@ -91,7 +91,7 @@ public class AuthorizationExtensionsTest
                 Assert.Equal($"{DefaultAudience}:{AuthorizationExtensions.ScopeClaimMapping[scope]}", allowedScope);
             });
     }
-    
+
     private static void ValidateRequireClientCredentialsPolicy(AuthorizationPolicy? policy)
     {
         Assert.NotNull(policy);

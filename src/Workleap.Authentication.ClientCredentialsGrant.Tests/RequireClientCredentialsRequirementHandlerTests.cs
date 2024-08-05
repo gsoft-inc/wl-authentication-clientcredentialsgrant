@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FakeItEasy;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -35,7 +35,7 @@ public class RequireClientCredentialsRequirementHandlerTests
         // Then
         Assert.True(context.HasSucceeded);
     }
-    
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -43,13 +43,13 @@ public class RequireClientCredentialsRequirementHandlerTests
     {
         // Given
         var expectedAudience = "invoices";
-        
+
         var userClaims = new List<Claim>
         {
             new("scope", usePrefixAudienceFormat ? $"{expectedAudience}:requiredPermission" : "requiredPermission"),
             new("scope", "otherPermission"),
         };
-        
+
         var requiredPermission = "requiredPermission";
 
         var context = ConfigureHandlerContext(userClaims, requiredPermission);
@@ -64,7 +64,7 @@ public class RequireClientCredentialsRequirementHandlerTests
         // Then
         Assert.True(context.HasSucceeded);
     }
-    
+
     [Fact]
     public async Task GivenUserDoNotHaveTheRequiredScopes_WhenHandleRequirement_ThenNotSucceeded()
     {
@@ -86,12 +86,12 @@ public class RequireClientCredentialsRequirementHandlerTests
         // Then
         Assert.False(context.HasSucceeded);
     }
-    
+
     private static RequireClientCredentialsRequirementHandler ConfigureHandler(JwtBearerOptions jwtOptions)
     {
         var jwtOptionsMonitor = A.Fake<IOptionsMonitor<JwtBearerOptions>>();
         A.CallTo(() => jwtOptionsMonitor.Get(ClientCredentialsDefaults.AuthenticationScheme)).Returns(jwtOptions);
-        
+
         return new RequireClientCredentialsRequirementHandler(jwtOptionsMonitor);
     }
 
@@ -108,7 +108,7 @@ public class RequireClientCredentialsRequirementHandlerTests
 
         return new AuthorizationHandlerContext(new[] { new RequireClientCredentialsRequirement() }, user, httpContext);
     }
-    
+
     private sealed class EndpointFeature : IEndpointFeature
     {
         public Endpoint? Endpoint { get; set; }

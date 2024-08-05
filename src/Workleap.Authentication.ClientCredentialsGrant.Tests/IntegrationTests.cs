@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Net;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -152,7 +152,7 @@ public class IntegrationTests
             // Using the classic policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
             var readInvoicesResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices", cts.Token);
             Assert.Equal("This protected endpoint is for reading invoices", readInvoicesResponse);
-            
+
             // Using the granular policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
             var readInvoicesGranularResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices-granular", cts.Token);
             Assert.Equal("This protected endpoint is for reading invoices", readInvoicesGranularResponse);
