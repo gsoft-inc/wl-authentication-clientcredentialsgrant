@@ -3,6 +3,7 @@
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Authorization;
 
+[Obsolete("Use RequireClientCredentialsAttribute instead")]
 public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
 {
     private readonly Dictionary<ClientCredentialsScope, string> _policyScopeMapping = new()
@@ -16,7 +17,7 @@ public sealed class ClientCredentialsAuthorizeAttribute : AuthorizeAttribute
     {
         if (!this._policyScopeMapping.TryGetValue(scope, out var policy))
         {
-            throw new ArgumentException($"${scope} is not an valid scope value");
+            throw new ArgumentException($"'{scope}' is not an valid scope value");
         }
 
         this.Scope = scope;

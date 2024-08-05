@@ -1,5 +1,7 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
 using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,6 +43,9 @@ public class IntegrationTests
             new ApiResource(Audience, "Invoice API") { Scopes = { $"{Audience}:read", $"{Audience}:pay" } },
         };
 
+        var tokenLifetime = TimeSpan.FromSeconds(12);
+        var tokenCacheLifetimeBuffer = TimeSpan.FromSeconds(3); // token will be evicted from cache prior to its expiration
+
         // Define the OAuth 2.0 clients and the scopes that can be granted
         var identityOAuthClients = new[]
         {
@@ -51,6 +56,7 @@ public class IntegrationTests
                 ClientSecrets = new[] { new Secret("invoices_read_client_secret".Sha256()) },
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
                 AllowedScopes = { $"{Audience}:read" },
+                AccessTokenLifetime = (int)tokenLifetime.TotalSeconds,
             },
         };
 
@@ -67,7 +73,8 @@ public class IntegrationTests
         webAppBuilder.Services.AddIdentityServer()
             .AddInMemoryClients(identityOAuthClients)
             .AddInMemoryApiResources(identityApiResources)
-            .AddInMemoryApiScopes(identityApiScopes);
+            .AddInMemoryApiScopes(identityApiScopes)
+            .AddSigningKeyStore<InMemorySigningKeyStore>();
 
         // Create the authorization policy that will be used to protect our invoices endpoints
         webAppBuilder.Services.AddAuthentication().AddClientCredentials();
@@ -87,7 +94,8 @@ public class IntegrationTests
 
         // Configure the authenticated HttpClient used to communicate with the protected invoices endpoint
         // Also change the primary HTTP message handler to communicate with this in-memory test server without accessing the network
-        webAppBuilder.Services.AddHttpClient("invoices_read_http_client")
+        const string invoiceReadClientName = "invoices_read_http_client";
+        webAppBuilder.Services.AddHttpClient(invoiceReadClientName)
             .ConfigurePrimaryHttpMessageHandler(x => x.GetRequiredService<TestServer>().CreateHandler())
             .AddClientCredentialsHandler(options =>
             {
@@ -95,6 +103,7 @@ public class IntegrationTests
                 options.ClientId = "invoices_read_client";
                 options.ClientSecret = "invoices_read_client_secret";
                 options.Scope = $"{Audience}:read";
+                options.CacheLifetimeBuffer = tokenCacheLifetimeBuffer;
             });
 
         // Here begins ASP.NET Core middleware pipelines registration
@@ -106,31 +115,83 @@ public class IntegrationTests
         webApp.MapGet("/public", () => "This endpoint is public").RequireHost("invoice-app.local");
         webApp.MapGet("/read-invoices", () => "This protected endpoint is for reading invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationReadPolicy).RequireHost("invoice-app.local");
         webApp.MapGet("/pay-invoices", () => "This protected endpoint is for paying invoices").RequireAuthorization(ClientCredentialsDefaults.AuthorizationWritePolicy).RequireHost("invoice-app.local");
+        webApp.MapGet("/read-invoices-granular", () => "This protected endpoint is for reading invoices").RequireClientCredentials("read").RequireHost("invoice-app.local");
+        webApp.MapGet("/pay-invoices-granular", () => "This protected endpoint is for paying invoices").RequireClientCredentials("pay").RequireHost("invoice-app.local");
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 
         try
         {
             // Start the web app without blocking, the cancellation token source will make sure it will be shutdown if something wrong happens
-            _ = webApp.RunAsync(cts.Token);
+            webApp.RunAsync(cts.Token).Forget();
 
-            var invoicesReadHttpClient = webApp.Services.GetRequiredService<IHttpClientFactory>().CreateClient("invoices_read_http_client");
+            try
+            {
+                // Ensure that registered clients get cached tokens on app startup
+                var cachingBackgroundService = webApp.Services.GetRequiredService<OnStartupTokenCacheBackgroundService>();
+                await cachingBackgroundService.WaitForTokenCachingToCompleteAsync(cts.Token);
+            }
+            catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+            {
+                throw new TimeoutException($"{nameof(OnStartupTokenCacheBackgroundService)} didn't complete its job in time");
+            }
+
+            // Retrieve the access token from the cache for later comparison
+            // Assert that the token lifetime is set according to the IdentityServer configuration
+            var tokenCache = webApp.Services.GetRequiredService<IClientCredentialsTokenCache>();
+            var tokenAfterStartupBackgroundCaching = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
+            Assert.NotNull(tokenAfterStartupBackgroundCaching);
+            Assert.InRange(tokenAfterStartupBackgroundCaching.Expiration, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.Add(tokenLifetime));
+
+            var invoicesReadHttpClient = webApp.Services.GetRequiredService<IHttpClientFactory>().CreateClient(invoiceReadClientName);
 
             // Consuming an anonymous/public endpoint should work
             var publicEndpointResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/public", cts.Token);
             Assert.Equal("This endpoint is public", publicEndpointResponse);
 
-            // Reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
+            // Using the classic policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
             var readInvoicesResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices", cts.Token);
             Assert.Equal("This protected endpoint is for reading invoices", readInvoicesResponse);
+            
+            // Using the granular policy, reading invoices should be successful because we're authenticated with a JWT that has the "invoices" audience and "invoices.read" scope
+            var readInvoicesGranularResponse = await invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/read-invoices-granular", cts.Token);
+            Assert.Equal("This protected endpoint is for reading invoices", readInvoicesGranularResponse);
 
-            // Paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
-            var forbiddenException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices", cts.Token));
-            Assert.Equal(HttpStatusCode.Forbidden, forbiddenException.StatusCode);
+            // Using the classic policy, paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
+            var payInvoicesException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices", cts.Token));
+            Assert.Equal(HttpStatusCode.Forbidden, payInvoicesException.StatusCode);
+
+            // Using the granular policy, paying invoices should throw a forbidden HTTP exception because the JWT doesn't have the "invoices.pay" scope
+            var payInvoicesGranularException = await Assert.ThrowsAsync<HttpRequestException>(() => invoicesReadHttpClient.GetStringAsync("https://invoice-app.local/pay-invoices-granular", cts.Token));
+            Assert.Equal(HttpStatusCode.Forbidden, payInvoicesGranularException.StatusCode);
 
             // We require JWT-authenticated requests to be sent over HTTPS
             var unsecuredException = await Assert.ThrowsAsync<ClientCredentialsException>(() => invoicesReadHttpClient.GetStringAsync("http://invoice-app.local/public", cts.Token));
             Assert.Equal("Due to security concerns, authenticated requests must be sent over HTTPS", unsecuredException.Message);
+
+            // Ensure the token is the same than the one we got after the background caching as it should still be valid
+            var tokenAfterAuthenticatedRequest = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
+            Assert.NotNull(tokenAfterAuthenticatedRequest);
+            Assert.Equal(tokenAfterStartupBackgroundCaching, tokenAfterAuthenticatedRequest);
+
+            // Wait until token is expired - before that, there should be no background refresh
+            var tokenManagementService = webApp.Services.GetRequiredService<ClientCredentialsTokenManagementService>();
+            Assert.Equal(0, tokenManagementService.BackgroundRefreshedTokenCount);
+            await Task.Delay(tokenAfterAuthenticatedRequest.Expiration - DateTimeOffset.UtcNow, cts.Token);
+
+            // At this point we're not making any new authenticated HTTP request,
+            // but a background task should have refreshed the token, which should differ from the initially cached one
+            Assert.Equal(1, tokenManagementService.BackgroundRefreshedTokenCount);
+            var tokenAfterFirstBackgroundRefresh = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
+            Assert.NotNull(tokenAfterFirstBackgroundRefresh);
+            Assert.NotEqual(tokenAfterStartupBackgroundCaching, tokenAfterFirstBackgroundRefresh);
+
+            // If we wait a little bit longer, the token should be refreshed again
+            await Task.Delay(tokenAfterFirstBackgroundRefresh.Expiration - DateTimeOffset.UtcNow, cts.Token);
+            Assert.Equal(2, tokenManagementService.BackgroundRefreshedTokenCount);
+            var tokenAfterSecondBackgroundRefresh = await tokenCache.GetAsync(invoiceReadClientName, cts.Token);
+            Assert.NotNull(tokenAfterSecondBackgroundRefresh);
+            Assert.NotEqual(tokenAfterFirstBackgroundRefresh, tokenAfterSecondBackgroundRefresh);
         }
         finally
         {
@@ -188,6 +249,30 @@ public class IntegrationTests
             }
 
             return cloneRequest;
+        }
+    }
+
+    // Prevents IdentityServer from using the actual file system to store the signing keys
+    // It also reduces the amount of logs, which makes troubleshooting easier
+    private sealed class InMemorySigningKeyStore : ISigningKeyStore
+    {
+        private readonly ConcurrentDictionary<string, SerializedKey> _keys = new(StringComparer.Ordinal);
+
+        public Task<IEnumerable<SerializedKey>> LoadKeysAsync()
+        {
+            return Task.FromResult(this._keys.Values.ToArray().AsEnumerable());
+        }
+
+        public Task StoreKeyAsync(SerializedKey key)
+        {
+            this._keys[key.Id] = key;
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteKeyAsync(string id)
+        {
+            this._keys.TryRemove(id, out _);
+            return Task.CompletedTask;
         }
     }
 }

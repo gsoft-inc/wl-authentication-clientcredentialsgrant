@@ -4,7 +4,7 @@
     <Authors>Workleap</Authors>
     <Owners>Workleap</Owners>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <LangVersion>10</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <AnalysisLevel>latest-All</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>

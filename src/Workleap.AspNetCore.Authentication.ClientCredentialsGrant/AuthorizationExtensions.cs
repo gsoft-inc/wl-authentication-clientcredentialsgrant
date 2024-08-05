@@ -1,6 +1,7 @@
 ﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -15,6 +16,9 @@ public static class AuthorizationExtensions
         [ClientCredentialsScope.Admin] = "admin",
     };
 
+    /// <summary>
+    /// Register the client credentials authorization policies.
+    /// </summary>
     public static IServiceCollection AddClientCredentialsAuthorization(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -45,7 +49,16 @@ public static class AuthorizationExtensions
                         .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
                         .RequireAuthenticatedUser()
                         .RequireClaim("scope", $"{jwtOptions.Audience}:{ScopeClaimMapping[ClientCredentialsScope.Admin]}"));
+                
+                authorizationOptions.AddPolicy(
+                    ClientCredentialsDefaults.RequireClientCredentialsPolicyName,
+                    policy => policy
+                        .AddAuthenticationSchemes(ClientCredentialsDefaults.AuthenticationScheme)
+                        .RequireAuthenticatedUser()
+                        .AddRequirements(new RequireClientCredentialsRequirement()));
             });
+        
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IAuthorizationHandler, RequireClientCredentialsRequirementHandler>());
 
         return services;
     }

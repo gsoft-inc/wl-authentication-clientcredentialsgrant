@@ -5,6 +5,8 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 
@@ -17,15 +19,30 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     private readonly ConcurrentDictionary<string, Lazy<Task<ClientCredentialsToken>>> _lazyGetNewTokenTasks;
     private readonly IClientCredentialsTokenEndpointService _tokenEndpointService;
     private readonly IClientCredentialsTokenCache _tokenCache;
+    private readonly IOptionsMonitor<ClientCredentialsOptions> _optionsMonitor;
+    private readonly CancellationToken _backgroundRefreshCancellationToken;
 
-    public ClientCredentialsTokenManagementService(IClientCredentialsTokenEndpointService tokenEndpointService, IClientCredentialsTokenCache tokenCache)
+    private long _backgroundRefreshedTokenCount;
+
+    public ClientCredentialsTokenManagementService(
+        IClientCredentialsTokenEndpointService tokenEndpointService,
+        IClientCredentialsTokenCache tokenCache,
+        IOptionsMonitor<ClientCredentialsOptions> optionsMonitor,
+        IHostApplicationLifetime? applicationLifetime = null)
     {
         // .NET named options are case sensitive (https://learn.microsoft.com/en-us/dotnet/core/extensions/options#named-options-support-using-iconfigurenamedoptions)
         this._lazyGetNewTokenTasks = new ConcurrentDictionary<string, Lazy<Task<ClientCredentialsToken>>>(StringComparer.Ordinal);
 
         this._tokenEndpointService = tokenEndpointService;
         this._tokenCache = tokenCache;
+        this._optionsMonitor = optionsMonitor;
+
+        // If the application is not using a .NET generic host, the application lifetime will be null
+        this._backgroundRefreshCancellationToken = applicationLifetime?.ApplicationStopping ?? CancellationToken.None;
     }
+
+    // Used for integration testing only
+    internal long BackgroundRefreshedTokenCount => this._backgroundRefreshedTokenCount;
 
     public async Task<ClientCredentialsToken> GetAccessTokenAsync(string clientName, CachingBehavior cachingBehavior, CancellationToken cancellationToken)
     {
@@ -38,14 +55,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
             }
         }
 
-        async Task<ClientCredentialsToken> GetNewAccessTokenAsync()
-        {
-            var newToken = await this._tokenEndpointService.RequestTokenAsync(clientName, cancellationToken).ConfigureAwait(false);
-            await this._tokenCache.SetAsync(clientName, newToken, cancellationToken).ConfigureAwait(false);
-            return newToken;
-        }
-
-        return await this.SynchronizeAsync(clientName, GetNewAccessTokenAsync).ConfigureAwait(false);
+        return await this.SynchronizeAsync(clientName, this.GetNewTokenTaskFactory(clientName, cancellationToken)).ConfigureAwait(false);
     }
 
     private async Task<ClientCredentialsToken> SynchronizeAsync(string clientName, Func<Task<ClientCredentialsToken>> getTokenTaskFactory)
@@ -57,6 +67,46 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         finally
         {
             this._lazyGetNewTokenTasks.TryRemove(clientName, out _);
+        }
+    }
+
+    private Func<Task<ClientCredentialsToken>> GetNewTokenTaskFactory(string clientName, CancellationToken cancellationToken) => async () =>
+    {
+        var newToken = await this._tokenEndpointService.RequestTokenAsync(clientName, cancellationToken).ConfigureAwait(false);
+
+        var cacheEvictionTime = await this._tokenCache.SetAsync(clientName, newToken, cancellationToken).ConfigureAwait(false);
+
+        var options = this._optionsMonitor.Get(clientName);
+        if (!options.EnablePeriodicTokenBackgroundRefresh)
+        {
+            return newToken;
+        }
+
+        var cacheDuration = cacheEvictionTime - DateTimeOffset.UtcNow;
+        if (cacheDuration > TimeSpan.Zero)
+        {
+            const double backgroundRefreshDelayFactor = 0.8;
+            var delayBeforeNextBackgroundRefresh = TimeSpan.FromTicks((long)Math.Round(cacheDuration.Ticks * backgroundRefreshDelayFactor));
+
+            this.ScheduleTokenBackgroundRefreshAsync(clientName, delayBeforeNextBackgroundRefresh).Forget();
+        }
+
+        return newToken;
+    };
+
+    private async Task ScheduleTokenBackgroundRefreshAsync(string clientName, TimeSpan delayBeforeNextBackgroundRefresh)
+    {
+        await Task.Delay(delayBeforeNextBackgroundRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            // We don't care about the token, we just want to refresh it in the background and have it cached
+            _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+            Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
+        }
+        catch (OperationCanceledException) when (this._backgroundRefreshCancellationToken.IsCancellationRequested)
+        {
+            // Expected when the application is shutting down
         }
     }
 }

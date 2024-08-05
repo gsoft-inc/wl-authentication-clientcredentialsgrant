@@ -1,5 +1,6 @@
 ﻿using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +30,8 @@ public static class ClientCredentialsHttpClientBuilderExtensions
 
         builder.Services.TryAddSingleton<IClientCredentialsTokenCache, ClientCredentialsTokenCache>();
         builder.Services.TryAddSingleton<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
-        builder.Services.TryAddSingleton<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
+        builder.Services.TryAddSingleton<ClientCredentialsTokenManagementService>();
+        builder.Services.TryAddSingleton<IClientCredentialsTokenManagementService>(x => x.GetRequiredService<ClientCredentialsTokenManagementService>());
         builder.Services.TryAddSingleton<IOpenIdConfigurationRetriever, OpenIdConfigurationRetrieverWithCache>();
         builder.Services.TryAddSingleton<IClientCredentialsTokenSerializer, ClientCredentialsTokenSerializer>();
 
@@ -43,6 +45,15 @@ public static class ClientCredentialsHttpClientBuilderExtensions
         {
             builder.Services.Add(ServiceDescriptor.Singleton<IConfigureOptions<HttpClientFactoryOptions>>(new AddClientCredentialsTokenHandlerConfigureOptions(builder.Name)));
         }
+
+        builder.Services.Configure<OnStartupTokenCacheBackgroundServiceOptions>(options =>
+        {
+            options.ClientCredentialsPoweredClientNames.Add(builder.Name);
+        });
+
+        // This background service is directly accessed in integration tests to ensure the token is cached on startup
+        builder.Services.TryAddSingleton<OnStartupTokenCacheBackgroundService>();
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, OnStartupTokenCacheBackgroundService>(x => x.GetRequiredService<OnStartupTokenCacheBackgroundService>()));
 
         return builder;
     }
