@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 
@@ -32,7 +32,7 @@ public sealed class RequireClientCredentialsAttribute : AuthorizeAttribute
         : this(EnumScopeNameMapping.GetValueOrDefault(scope) ?? throw new ArgumentOutOfRangeException(nameof(scope), scope, $"'{scope}' is not an valid scope value"))
     {
     }
-    
+
     /// <summary>
     /// Verifies that the endpoint is called with the right granular permissions. <br/>
     /// - It will check in those claims type: scope, scp or http://schemas.microsoft.com/identity/claims/scope <br/>
