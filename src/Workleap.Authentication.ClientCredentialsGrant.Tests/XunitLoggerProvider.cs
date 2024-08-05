@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests;
 
@@ -27,6 +28,7 @@ internal sealed class XunitLoggerProvider : ILoggerProvider, ILogger
         return this;
     }
 
+    [SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs")]
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         var message = formatter(state, exception);
