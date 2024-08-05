@@ -20,6 +20,8 @@ Process {
         Push-Location $workingDir
         Remove-Item $outputDir -Force -Recurse -ErrorAction SilentlyContinue
     
+	# Duende.IdentityServer fails signature validation
+	$env:DOTNET_NUGET_SIGNATURE_VERIFICATION="false"
         Exec { & dotnet clean -c Release }
         Exec { & dotnet build -c Release }
         Exec { & dotnet test  -c Release --no-build --results-directory "$outputDir" --no-restore -l "trx" -l "console;verbosity=detailed" }
