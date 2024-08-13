@@ -3,6 +3,7 @@
 using System.ComponentModel;
 
 // ReSharper disable once CheckNamespace
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace System.Runtime.CompilerServices;
 
 // Compiler helper class that allows using "init" keyword in .NET Standard 2.0:
