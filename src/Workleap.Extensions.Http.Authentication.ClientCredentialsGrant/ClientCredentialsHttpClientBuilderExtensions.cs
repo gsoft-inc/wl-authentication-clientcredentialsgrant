@@ -1,10 +1,11 @@
-﻿using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
+using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ClientCredentialsHttpClientBuilderExtensions

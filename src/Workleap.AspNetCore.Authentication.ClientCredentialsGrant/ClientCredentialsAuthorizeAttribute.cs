@@ -1,6 +1,7 @@
-﻿using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
+using Workleap.AspNetCore.Authentication.ClientCredentialsGrant;
 
 // ReSharper disable once CheckNamespace
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.AspNetCore.Authorization;
 
 [Obsolete("Use RequireClientCredentialsAttribute instead")]
