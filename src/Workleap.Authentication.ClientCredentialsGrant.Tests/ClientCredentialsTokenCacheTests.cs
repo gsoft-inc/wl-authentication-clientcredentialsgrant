@@ -4,6 +4,7 @@ using FakeItEasy;
 using Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests;
@@ -37,7 +38,7 @@ public class ClientCredentialsTokenCacheTests
         var optionsMonitor = A.Fake<IOptionsMonitor<ClientCredentialsOptions>>();
         A.CallTo(() => optionsMonitor.Get(A<string>._)).ReturnsLazily((string name) => namedOptions.GetOrAdd(name, _ => new ClientCredentialsOptions()));
 
-        this._tokenCache = new ClientCredentialsTokenCache(this._memoryCache, this._distributedCache, this._tokenSerializer, optionsMonitor);
+        this._tokenCache = new ClientCredentialsTokenCache(this._memoryCache, this._distributedCache, this._tokenSerializer, optionsMonitor, new NullLogger<ClientCredentialsTokenCache>());
     }
 
     [Fact]

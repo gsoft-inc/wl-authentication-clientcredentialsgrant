@@ -1,9 +1,10 @@
 using CliWrap;
+using CliWrap.Buffered;
 using Meziantou.Framework;
 
 namespace Workleap.Authentication.ClientCredentialsGrant.Tests.OpenAPI;
 
-public class OpenApiSecurityDescriptionTests
+public class OpenApiSecurityDescriptionTests(ITestOutputHelper testOutputHelper)
 {
     [Fact]
     public async Task Given_API_With_Client_Credentials_Attribute_When_Generating_OpenAPI_Then_Equal_Expected_Document()
@@ -20,7 +21,11 @@ public class OpenApiSecurityDescriptionTests
             .WithWorkingDirectory(projectFolder)
             .WithValidation(CommandResultValidation.None)
             .WithArguments(["build", "--no-incremental"])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
+
+        testOutputHelper.WriteLine("Build output:");
+        testOutputHelper.WriteLine(result.StandardError);
+        testOutputHelper.WriteLine(result.StandardOutput);
 
         // Check if the build was successful
         Assert.Equal(0, result.ExitCode);

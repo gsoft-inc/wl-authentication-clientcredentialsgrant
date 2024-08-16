@@ -1,12 +1,13 @@
 ﻿// This file is based on https://github.com/DuendeSoftware/Duende.AccessTokenManagement/blob/1.1.0/src/Duende.AccessTokenManagement/ClientCredentialsTokenEndpointService.cs
+// This file is based on https://github.com/DuendeSoftware/Duende.AccessTokenManagement/blob/1.1.0/src/Duende.AccessTokenManagement/ClientCredentialsTokenEndpointService.cs
 // Copyright (c) Brock Allen & Dominick Baier, licensed under the Apache License, Version 2.0. All rights reserved.
 //
 // The original file has been significantly modified, and these modifications are Copyright (c) Workleap, 2023.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System.Net;
 using System.Text;
 using IdentityModel.Client;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
@@ -19,12 +20,18 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ClientCredentialsOptions> _optionsMonitor;
     private readonly IOpenIdConfigurationRetriever _oidcRetriever;
+    private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
-    public ClientCredentialsTokenEndpointService(IHttpClientFactory httpClientFactory, IOptionsMonitor<ClientCredentialsOptions> optionsMonitor, IOpenIdConfigurationRetriever oidcRetriever)
+    public ClientCredentialsTokenEndpointService(
+        IHttpClientFactory httpClientFactory,
+        IOptionsMonitor<ClientCredentialsOptions> optionsMonitor,
+        IOpenIdConfigurationRetriever oidcRetriever,
+        ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         this._httpClientFactory = httpClientFactory;
         this._optionsMonitor = optionsMonitor;
         this._oidcRetriever = oidcRetriever;
+        this._logger = logger;
     }
 
     public async Task<ClientCredentialsToken> RequestTokenAsync(string clientName, CancellationToken cancellationToken)
@@ -44,7 +51,10 @@ internal class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEn
 
         var httpClient = this._httpClientFactory.CreateClient(ClientCredentialsConstants.BackchannelHttpClientName);
 
-        // Eventually replace IdentityModel with Microsoft.Identity.Client (MSAL) when their generic authority feature is mature
+        this._logger.RequestingNewTokenForClient(options.ClientId);
+
+        // Eventually replace IdentityModel with Microsoft.Identity.Client (MSAL)
+        // https://anthonysimmon.com/replacing-identitymodel-with-msal-oidc-support/
         var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
         try

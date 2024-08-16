@@ -10,6 +10,16 @@ namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
 
 internal sealed class ClientCredentialsToken
 {
+    public ClientCredentialsToken()
+    {
+    }
+
+    public ClientCredentialsToken(string accessToken, DateTimeOffset expiration)
+    {
+        this.AccessToken = accessToken;
+        this.Expiration = expiration;
+    }
+
     [JsonPropertyName("accessToken")]
     public string AccessToken { get; init; } = string.Empty;
 
@@ -19,6 +29,12 @@ internal sealed class ClientCredentialsToken
     private bool Equals(ClientCredentialsToken other)
     {
         return this.AccessToken == other.AccessToken && this.Expiration.Equals(other.Expiration);
+    }
+
+    public TimeSpan GetTimeToLive(DateTimeOffset now)
+    {
+        var timeToLive = this.Expiration - now;
+        return timeToLive > TimeSpan.Zero ? timeToLive : TimeSpan.Zero;
     }
 
     public override bool Equals(object? obj)

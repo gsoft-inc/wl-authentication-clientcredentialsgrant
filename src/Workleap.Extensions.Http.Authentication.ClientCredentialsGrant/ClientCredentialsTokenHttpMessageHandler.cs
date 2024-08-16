@@ -37,10 +37,15 @@ internal sealed class ClientCredentialsTokenHttpMessageHandler : PolicyHttpMessa
         this._options = options;
     }
 
-    protected override async Task<HttpResponseMessage> SendCoreAsync(HttpRequestMessage request, Context context, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         this.EnsureRequestIsSentOverHttps(request);
+        using var activity = TracingHelper.StartAuthenticationActivity(this._options.ClientId);
+        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
 
+    protected override async Task<HttpResponseMessage> SendCoreAsync(HttpRequestMessage request, Context context, CancellationToken cancellationToken)
+    {
         // Retry with a new token if the previous attempt was unauthorized
         var cachingBehavior = context.ContainsKey(RetryCountContextKey) ? CachingBehavior.ForceRefresh : CachingBehavior.PreferCache;
         await this.SetTokenAsync(request, cachingBehavior, cancellationToken).ConfigureAwait(false);

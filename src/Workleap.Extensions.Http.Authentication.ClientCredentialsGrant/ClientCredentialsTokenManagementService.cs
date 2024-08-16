@@ -6,6 +6,7 @@
 
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
@@ -20,6 +21,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     private readonly IClientCredentialsTokenEndpointService _tokenEndpointService;
     private readonly IClientCredentialsTokenCache _tokenCache;
     private readonly IOptionsMonitor<ClientCredentialsOptions> _optionsMonitor;
+    private readonly ILogger<ClientCredentialsTokenManagementService> _logger;
     private readonly CancellationToken _backgroundRefreshCancellationToken;
 
     private long _backgroundRefreshedTokenCount;
@@ -28,6 +30,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         IClientCredentialsTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenCache tokenCache,
         IOptionsMonitor<ClientCredentialsOptions> optionsMonitor,
+        ILogger<ClientCredentialsTokenManagementService> logger,
         IHostApplicationLifetime? applicationLifetime = null)
     {
         // .NET named options are case sensitive (https://learn.microsoft.com/en-us/dotnet/core/extensions/options#named-options-support-using-iconfigurenamedoptions)
@@ -36,6 +39,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
         this._tokenEndpointService = tokenEndpointService;
         this._tokenCache = tokenCache;
         this._optionsMonitor = optionsMonitor;
+        this._logger = logger;
 
         // If the application is not using a .NET generic host, the application lifetime will be null
         this._backgroundRefreshCancellationToken = applicationLifetime?.ApplicationStopping ?? CancellationToken.None;
@@ -46,6 +50,10 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
 
     public async Task<ClientCredentialsToken> GetAccessTokenAsync(string clientName, CachingBehavior cachingBehavior, CancellationToken cancellationToken)
     {
+        var options = this._optionsMonitor.Get(clientName);
+
+        this._logger.RequestingTokenForClientWithCachingBehavior(options.ClientId, cachingBehavior);
+
         if (cachingBehavior == CachingBehavior.PreferCache)
         {
             var cachedToken = await this._tokenCache.GetAsync(clientName, cancellationToken).ConfigureAwait(false);
@@ -74,7 +82,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     {
         var newToken = await this._tokenEndpointService.RequestTokenAsync(clientName, cancellationToken).ConfigureAwait(false);
 
-        var cacheEvictionTime = await this._tokenCache.SetAsync(clientName, newToken, cancellationToken).ConfigureAwait(false);
+        var cacheAbsoluteExpiration = await this._tokenCache.SetAsync(clientName, newToken, cancellationToken).ConfigureAwait(false);
 
         var options = this._optionsMonitor.Get(clientName);
         if (!options.EnablePeriodicTokenBackgroundRefresh)
@@ -82,11 +90,13 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
             return newToken;
         }
 
-        var cacheDuration = cacheEvictionTime - DateTimeOffset.UtcNow;
+        var cacheDuration = cacheAbsoluteExpiration - DateTimeOffset.UtcNow;
         if (cacheDuration > TimeSpan.Zero)
         {
             const double backgroundRefreshDelayFactor = 0.8;
             var delayBeforeNextBackgroundRefresh = TimeSpan.FromTicks((long)Math.Round(cacheDuration.Ticks * backgroundRefreshDelayFactor));
+
+            this._logger.SchedulingBackgroundTokenRefresh(options.ClientId, delayBeforeNextBackgroundRefresh);
 
             this.ScheduleTokenBackgroundRefreshAsync(clientName, delayBeforeNextBackgroundRefresh).Forget();
         }
@@ -96,10 +106,15 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
 
     private async Task ScheduleTokenBackgroundRefreshAsync(string clientName, TimeSpan delayBeforeNextBackgroundRefresh)
     {
-        await Task.Delay(delayBeforeNextBackgroundRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
-
         try
         {
+            await Task.Delay(delayBeforeNextBackgroundRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+
+            var options = this._optionsMonitor.Get(clientName);
+            this._logger.ExecutingBackgroundTokenRefresh(options.ClientId);
+
+            using var activity = TracingHelper.StartBackgroundRefreshDetachedActivity(options.ClientId);
+
             // We don't care about the token, we just want to refresh it in the background and have it cached
             _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
             Interlocked.Increment(ref this._backgroundRefreshedTokenCount);

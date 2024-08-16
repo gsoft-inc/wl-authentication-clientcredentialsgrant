@@ -86,9 +86,16 @@ internal sealed class OnStartupTokenCacheBackgroundService : BackgroundService
     {
         if (this._clientNames.Count > 0)
         {
-            var timeoutTask = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-            var completedTask = await Task.WhenAny(this._allTokensCachedSignal.Task, timeoutTask).ConfigureAwait(false);
-            await completedTask.ConfigureAwait(false);
+            try
+            {
+                var timeoutTask = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+                var completedTask = await Task.WhenAny(this._allTokensCachedSignal.Task, timeoutTask).ConfigureAwait(false);
+                await completedTask.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException($"{nameof(OnStartupTokenCacheBackgroundService)} didn't complete its job in time");
+            }
         }
     }
 

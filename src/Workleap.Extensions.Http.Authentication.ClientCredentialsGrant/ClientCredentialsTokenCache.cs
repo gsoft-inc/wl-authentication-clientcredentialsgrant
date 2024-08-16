@@ -6,6 +6,7 @@
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Workleap.Extensions.Http.Authentication.ClientCredentialsGrant;
@@ -20,19 +21,26 @@ internal sealed class ClientCredentialsTokenCache : IClientCredentialsTokenCache
     private readonly IDistributedCache _distributedCache;
     private readonly IClientCredentialsTokenSerializer _tokenSerializer;
     private readonly IOptionsMonitor<ClientCredentialsOptions> _optionsMonitor;
+    private readonly ILogger<ClientCredentialsTokenCache> _logger;
 
-    public ClientCredentialsTokenCache(IDistributedCache distributedCache, IClientCredentialsTokenSerializer tokenSerializer, IOptionsMonitor<ClientCredentialsOptions> optionsMonitor)
-        : this(new MemoryCache(new MemoryCacheOptions()), distributedCache, tokenSerializer, optionsMonitor)
+    public ClientCredentialsTokenCache(IDistributedCache distributedCache, IClientCredentialsTokenSerializer tokenSerializer, IOptionsMonitor<ClientCredentialsOptions> optionsMonitor, ILogger<ClientCredentialsTokenCache> logger)
+        : this(new MemoryCache(new MemoryCacheOptions()), distributedCache, tokenSerializer, optionsMonitor, logger)
     {
     }
 
     // Constructor used by tests
-    internal ClientCredentialsTokenCache(IMemoryCache memoryCache, IDistributedCache distributedCache, IClientCredentialsTokenSerializer tokenSerializer, IOptionsMonitor<ClientCredentialsOptions> optionsMonitor)
+    internal ClientCredentialsTokenCache(IMemoryCache memoryCache, IDistributedCache distributedCache, IClientCredentialsTokenSerializer tokenSerializer, IOptionsMonitor<ClientCredentialsOptions> optionsMonitor, ILogger<ClientCredentialsTokenCache> logger)
     {
         this._memoryCache = memoryCache;
         this._distributedCache = distributedCache;
         this._tokenSerializer = tokenSerializer;
         this._optionsMonitor = optionsMonitor;
+        this._logger = logger;
+
+        if (distributedCache is MemoryDistributedCache)
+        {
+            logger.DistributedCacheIsUsingInMemoryImplementation();
+        }
     }
 
     public async Task<DateTimeOffset> SetAsync(string clientName, ClientCredentialsToken token, CancellationToken cancellationToken)
@@ -40,16 +48,19 @@ internal sealed class ClientCredentialsTokenCache : IClientCredentialsTokenCache
         var options = this._optionsMonitor.Get(clientName);
 
         var tokenBytes = this._tokenSerializer.Serialize(clientName, token);
-        var cacheEvictionTime = token.Expiration.Subtract(options.CacheLifetimeBuffer);
+        var cacheEntryAbsoluteExpiration = token.Expiration - options.CacheLifetimeBuffer;
+        var cacheDuration = cacheEntryAbsoluteExpiration - DateTimeOffset.UtcNow;
+
+        this._logger.CachingToken(options.ClientId, options.CacheKey, cacheDuration);
 
         // Store token in L1 first
-        this._memoryCache.Set(options.CacheKey, tokenBytes, new MemoryCacheEntryOptions { AbsoluteExpiration = cacheEvictionTime });
+        this._memoryCache.Set(options.CacheKey, tokenBytes, new MemoryCacheEntryOptions { AbsoluteExpiration = cacheEntryAbsoluteExpiration });
 
         // Then store token in L2
-        var distributedCacheOptions = new DistributedCacheEntryOptions { AbsoluteExpiration = cacheEvictionTime };
+        var distributedCacheOptions = new DistributedCacheEntryOptions { AbsoluteExpiration = cacheEntryAbsoluteExpiration };
         await this._distributedCache.SetAsync(options.CacheKey, tokenBytes, distributedCacheOptions, cancellationToken).ConfigureAwait(false);
 
-        return cacheEvictionTime;
+        return cacheEntryAbsoluteExpiration;
     }
 
     public async Task<ClientCredentialsToken?> GetAsync(string clientName, CancellationToken cancellationToken)
@@ -60,7 +71,10 @@ internal sealed class ClientCredentialsTokenCache : IClientCredentialsTokenCache
         var l1TokenBytes = this._memoryCache.Get<byte[]?>(options.CacheKey);
         if (l1TokenBytes != null)
         {
-            return this._tokenSerializer.Deserialize(clientName, l1TokenBytes);
+            var l1Token = this._tokenSerializer.Deserialize(clientName, l1TokenBytes);
+            this._logger.SuccessfullyReadTokenFromL1Cache(options.ClientId, options.CacheKey, l1Token.GetTimeToLive(DateTimeOffset.UtcNow));
+
+            return l1Token;
         }
 
         // Then read from L2 if not found in L1
@@ -70,12 +84,13 @@ internal sealed class ClientCredentialsTokenCache : IClientCredentialsTokenCache
             return null;
         }
 
-        var token = this._tokenSerializer.Deserialize(clientName, l2TokenBytes);
+        var l2Token = this._tokenSerializer.Deserialize(clientName, l2TokenBytes);
+        this._logger.SuccessfullyReadTokenFromL2Cache(options.ClientId, options.CacheKey, l2Token.GetTimeToLive(DateTimeOffset.UtcNow));
 
         // Promote L2-cached token to L1
-        var absoluteExpiration = token.Expiration.Subtract(options.CacheLifetimeBuffer);
+        var absoluteExpiration = l2Token.Expiration.Subtract(options.CacheLifetimeBuffer);
         this._memoryCache.Set(options.CacheKey, l2TokenBytes, new MemoryCacheEntryOptions { AbsoluteExpiration = absoluteExpiration });
 
-        return token;
+        return l2Token;
     }
 }
