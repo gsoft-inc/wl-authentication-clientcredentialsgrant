@@ -37,7 +37,7 @@ internal static class TracingHelper
 
         if (activity != null)
         {
-            activity.DisplayName = "M2M background refresh";
+            activity.DisplayName = "Client credentials background refresh";
             activity.SetTag(ClientIdTagName, clientId);
         }
 
