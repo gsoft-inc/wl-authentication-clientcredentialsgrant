@@ -31,7 +31,7 @@ internal static class TracingHelper
     }
 
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument", Justification = "We want a specific activity name, not the caller method name")]
-    public static Activity? StartBackgroundRefreshDetachedActivity(string clientId)
+    public static Activity? StartBackgroundRefreshActivity(string clientId)
     {
         var activity = ActivitySource.StartActivity(ActivityName, ActivityKind.Internal, parentId: null!);
 

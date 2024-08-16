@@ -5,6 +5,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -111,13 +112,22 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
             await Task.Delay(delayBeforeNextBackgroundRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
 
             var options = this._optionsMonitor.Get(clientName);
-            this._logger.ExecutingBackgroundTokenRefresh(options.ClientId);
 
-            using var activity = TracingHelper.StartBackgroundRefreshDetachedActivity(options.ClientId);
+            // This is a background process and must not be associated to the current activity
+            // https://github.com/open-telemetry/opentelemetry-dotnet/issues/984
+            var parentActivity = Activity.Current;
+            Activity.Current = null;
 
-            // We don't care about the token, we just want to refresh it in the background and have it cached
-            _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
-            Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
+            using (TracingHelper.StartBackgroundRefreshActivity(options.ClientId))
+            {
+                this._logger.ExecutingBackgroundTokenRefresh(options.ClientId);
+
+                // We don't care about the token, we just want to refresh it in the background and have it cached
+                _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+                Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
+            }
+
+            Activity.Current = parentActivity;
         }
         catch (OperationCanceledException) when (this._backgroundRefreshCancellationToken.IsCancellationRequested)
         {
