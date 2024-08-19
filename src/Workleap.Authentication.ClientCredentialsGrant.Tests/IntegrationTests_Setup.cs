@@ -100,14 +100,14 @@ public sealed partial class IntegrationTests
         return idp;
     }
 
-    private WebApplication CreateTestApi(string appName, WebApplication idp)
+    private WebApplication CreateTestApi(CreateApiOptions createApiOptions)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseTestServer();
 
         builder.Logging.SetMinimumLevel(LogLevel.Debug);
         builder.Logging.ClearProviders();
-        builder.Logging.AddProvider(new XunitLoggerProvider(testOutputHelper, appName));
+        builder.Logging.AddProvider(new XunitLoggerProvider(testOutputHelper, createApiOptions.AppName));
 
         builder.Services.AddSingleton<TestServer>(x => (TestServer)x.GetRequiredService<IServer>());
         builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
@@ -117,7 +117,7 @@ public sealed partial class IntegrationTests
         {
             options.Audience = InvoicesAudience;
             options.Authority = InvoicesAuthority;
-            options.Backchannel = idp.GetTestClient();
+            options.Backchannel = createApiOptions.IdentityProvider.GetTestClient();
         });
 
         // This invoice authorization policy must be individually applied to endpoints
@@ -125,7 +125,7 @@ public sealed partial class IntegrationTests
 
         // Change the primary HTTP message handler of this library to communicate with the in-memory IDP server
         builder.Services.AddHttpClient(ClientCredentialsConstants.BackchannelHttpClientName)
-            .ConfigurePrimaryHttpMessageHandler(() => idp.GetTestServer().CreateHandler());
+            .ConfigurePrimaryHttpMessageHandler(() => createApiOptions.IdentityProvider.GetTestServer().CreateHandler());
 
         // Configure the authenticated HttpClient used to communicate with the protected invoices endpoint
         // Also change the primary HTTP message handler to communicate with this in-memory test server without accessing the network
@@ -138,6 +138,7 @@ public sealed partial class IntegrationTests
                 options.ClientSecret = InvoicesReadClientSecret;
                 options.Scope = InvoicesReadScope;
                 options.CacheLifetimeBuffer = TokenCacheLifetimeBuffer;
+                options.EnforceHttps = createApiOptions.EnforceHttps;
             });
 
         // Share the same distributed cache among all instances of the test APIs
@@ -192,5 +193,14 @@ public sealed partial class IntegrationTests
             this._keys.TryRemove(id, out _);
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class CreateApiOptions(WebApplication identityProvider)
+    {
+        public WebApplication IdentityProvider { get; } = identityProvider;
+
+        public required string AppName { get; init; }
+
+        public required bool EnforceHttps { get; init; }
     }
 }

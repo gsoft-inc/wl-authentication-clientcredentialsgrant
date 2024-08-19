@@ -23,6 +23,9 @@ public sealed partial class IntegrationTests(ITestOutputHelper testOutputHelper)
     private WebApplication _api1 = null!;
     private WebApplication _api2 = null!;
 
+    private HttpClient _api1Client = null!;
+    private HttpClient _api2Client = null!;
+
     private int _tokenRequestCount;
 
     public async Task InitializeAsync()
@@ -32,8 +35,17 @@ public sealed partial class IntegrationTests(ITestOutputHelper testOutputHelper)
         await this._idp.StartAsync(this._timeout.Token);
 
         // Creating multiple test APIs helps simulate a distributed system with multiple replicas
-        this._api1 = this.CreateTestApi("app1", this._idp);
-        this._api2 = this.CreateTestApi("app2", this._idp);
+        this._api1 = this.CreateTestApi(new CreateApiOptions(this._idp)
+        {
+            AppName = "app1",
+            EnforceHttps = true,
+        });
+
+        this._api2 = this.CreateTestApi(new CreateApiOptions(this._idp)
+        {
+            AppName = "app2",
+            EnforceHttps = false,
+        });
 
         // Ensure that registered clients get cached tokens on app startup
         await this._api1.StartAsync(this._timeout.Token);
@@ -44,54 +56,59 @@ public sealed partial class IntegrationTests(ITestOutputHelper testOutputHelper)
 
         // TODO improve background token acquisition so that 2nd app uses the token cached by the 1st app from the distributed cache
         Assert.Equal(2, this._tokenRequestCount);
+
+        this._api1Client = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
+        this._api2Client = this._api2.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
     }
 
     [Fact]
     public async Task GivenAnonymousEndpoint_WhenReadAuthenticatedHttpRequest_ShouldBeSuccessful()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var response = await httpClient.GetStringAsync("https://invoice-app.local/anonymous", this._timeout.Token);
-        Assert.Equal("This endpoint is public", response);
+        var response = await this._api1Client.GetAsync("https://invoice-app.local/anonymous", this._timeout.Token);
+        response.EnsureSuccessStatusCode();
     }
 
     [Fact]
     public async Task GivenReadEndpointWithClassicPolicy_WhenReadAuthenticatedHttpRequest_ShouldBeSuccessful()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var response = await httpClient.GetStringAsync("https://invoice-app.local/read-invoices", this._timeout.Token);
-        Assert.Equal("This protected endpoint is for reading invoices", response);
+        var response = await this._api1Client.GetAsync("https://invoice-app.local/read-invoices", this._timeout.Token);
+        response.EnsureSuccessStatusCode();
     }
 
     [Fact]
     public async Task GivenReadEndpointWithGranularPolicy_WhenReadAuthenticatedHttpRequest_ShouldBeSuccessful()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var response = await httpClient.GetStringAsync("https://invoice-app.local/read-invoices-granular", this._timeout.Token);
-        Assert.Equal("This protected endpoint is for reading invoices", response);
+        var response = await this._api1Client.GetAsync("https://invoice-app.local/read-invoices-granular", this._timeout.Token);
+        response.EnsureSuccessStatusCode();
     }
 
     [Fact]
     public async Task GivenPayEndpointWithClassicPolicy_WhenReadAuthenticatedHttpRequest_ShouldThrowForbiddenHttpException()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => httpClient.GetStringAsync("https://invoice-app.local/pay-invoices", this._timeout.Token));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this._api1Client.GetStringAsync("https://invoice-app.local/pay-invoices", this._timeout.Token));
         Assert.Equal(HttpStatusCode.Forbidden, ex.StatusCode);
     }
 
     [Fact]
     public async Task GivenPayEndpointWithGranularPolicy_WhenReadAuthenticatedHttpRequest_ShouldThrowForbiddenHttpException()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => httpClient.GetStringAsync("https://invoice-app.local/pay-invoices-granular", this._timeout.Token));
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => this._api1Client.GetStringAsync("https://invoice-app.local/pay-invoices-granular", this._timeout.Token));
         Assert.Equal(HttpStatusCode.Forbidden, ex.StatusCode);
     }
 
     [Fact]
     public async Task GivenHttpEndpoint_WhenHttpsIsRequired_ThrowsClientCredentialsException()
     {
-        var httpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var ex = await Assert.ThrowsAsync<ClientCredentialsException>(() => httpClient.GetStringAsync("http://invoice-app.local/public", this._timeout.Token));
+        var ex = await Assert.ThrowsAsync<ClientCredentialsException>(() => this._api1Client.GetStringAsync("http://invoice-app.local/anonymous", this._timeout.Token));
         Assert.Equal("Due to security concerns, authenticated requests must be sent over HTTPS", ex.Message);
+    }
+
+    [Fact]
+    public async Task GivenHttpEndpoint_WhenHttpsIsNotRequired_DoesNotThrowClientCredentialsException()
+    {
+        // API 2 does not enforce HTTPS
+        var response = await this._api2Client.GetAsync("http://invoice-app.local/anonymous", this._timeout.Token);
+        response.EnsureSuccessStatusCode();
     }
 
     [Fact]
@@ -105,8 +122,7 @@ public sealed partial class IntegrationTests(ITestOutputHelper testOutputHelper)
         Assert.InRange(tokenAfterStartupBackgroundCaching.Expiration, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.Add(TokenLifetime));
 
         // Make an authenticated HTTP request to the protected endpoint
-        var api1HttpClient = this._api1.Services.GetRequiredService<IHttpClientFactory>().CreateClient(InvoiceReadHttpClientName);
-        var readInvoicesResponse = await api1HttpClient.GetStringAsync("https://invoice-app.local/read-invoices", this._timeout.Token);
+        var readInvoicesResponse = await this._api1Client.GetStringAsync("https://invoice-app.local/read-invoices", this._timeout.Token);
         Assert.Equal("This protected endpoint is for reading invoices", readInvoicesResponse);
 
         // Ensure the token is the same than the one we got after the background caching as it should still be valid
