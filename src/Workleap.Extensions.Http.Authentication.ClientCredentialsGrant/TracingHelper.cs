@@ -8,7 +8,7 @@ internal static class TracingHelper
 {
     private const string ActivityName = "ClientCredentials";
 
-    private const string ClientIdTagName = "clientcredentials.clientid";
+    private const string ClientIdTagName = "client_credentials.client_id";
 
     private static readonly Assembly Assembly = typeof(TracingHelper).Assembly;
     private static readonly AssemblyName AssemblyName = Assembly.GetName();
