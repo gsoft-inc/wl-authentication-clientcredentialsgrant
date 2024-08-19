@@ -118,16 +118,21 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
             var parentActivity = Activity.Current;
             Activity.Current = null;
 
-            using (TracingHelper.StartBackgroundRefreshActivity(options.ClientId))
+            try
             {
-                this._logger.ExecutingBackgroundTokenRefresh(options.ClientId);
+                using (TracingHelper.StartBackgroundRefreshActivity(options.ClientId))
+                {
+                    this._logger.ExecutingBackgroundTokenRefresh(options.ClientId);
 
-                // We don't care about the token, we just want to refresh it in the background and have it cached
-                _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
-                Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
+                    // We don't care about the token, we just want to refresh it in the background and have it cached
+                    _ = await this.GetAccessTokenAsync(clientName, CachingBehavior.ForceRefresh, this._backgroundRefreshCancellationToken).ConfigureAwait(false);
+                    Interlocked.Increment(ref this._backgroundRefreshedTokenCount);
+                }
             }
-
-            Activity.Current = parentActivity;
+            finally
+            {
+                Activity.Current = parentActivity;
+            }
         }
         catch (OperationCanceledException) when (this._backgroundRefreshCancellationToken.IsCancellationRequested)
         {
