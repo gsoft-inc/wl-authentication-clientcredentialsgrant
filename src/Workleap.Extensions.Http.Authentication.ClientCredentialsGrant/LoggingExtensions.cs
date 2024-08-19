@@ -22,8 +22,8 @@ internal static partial class LoggingExtensions
     public static partial void RequestingNewTokenForClient(this ILogger logger, string clientId);
 
     // ClientCredentialsTokenManagementService
-    [LoggerMessage(6, LogLevel.Debug, "Requesting a token for client ID {ClientId} with caching behavior {CachingBehavior}")]
-    public static partial void RequestingTokenForClientWithCachingBehavior(this ILogger logger, string clientId, CachingBehavior cachingBehavior);
+    [LoggerMessage(6, LogLevel.Debug, "Getting a token for client ID {ClientId} with caching behavior {CachingBehavior}")]
+    public static partial void GettingTokenForClientWithCachingBehavior(this ILogger logger, string clientId, CachingBehavior cachingBehavior);
 
     [LoggerMessage(7, LogLevel.Debug, "Scheduling background token refresh for client ID {ClientId} in {Delay}")]
     public static partial void SchedulingBackgroundTokenRefresh(this ILogger logger, string clientId, TimeSpan delay);

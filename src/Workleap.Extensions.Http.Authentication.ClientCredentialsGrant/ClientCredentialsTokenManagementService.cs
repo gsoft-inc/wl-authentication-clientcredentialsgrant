@@ -53,7 +53,7 @@ internal class ClientCredentialsTokenManagementService : IClientCredentialsToken
     {
         var options = this._optionsMonitor.Get(clientName);
 
-        this._logger.RequestingTokenForClientWithCachingBehavior(options.ClientId, cachingBehavior);
+        this._logger.GettingTokenForClientWithCachingBehavior(options.ClientId, cachingBehavior);
 
         if (cachingBehavior == CachingBehavior.PreferCache)
         {
