@@ -2,5 +2,22 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
       "github>gsoft-inc/renovate-config"
+    ],
+    "packageRules": [
+        {
+          "matchManagers": ["nuget"],
+          "matchPackagePatterns": ["^Microsoft\\.(Extensions|AspNetCore)\\.", "^System\\."],
+          "groupName": "Ignored NuGet dependencies",
+          "description": "These packages are usually set to a user-defined minimal supported version such as 6.0.0 for .NET 6, and they are overriden by consuming applications",
+          "enabled": false
+        },
+        {
+          "matchManagers": ["nuget"],
+          "matchPackageNames": ["Duende.IdentityServer"],
+          "groupName": "Duende.IdentityServer",
+          "description": "Only stay at v6 to keep support of .NET 6",
+          "matchUpdateTypes": ["major"],
+          "enabled": false
+        }
     ]
-  }
+}
