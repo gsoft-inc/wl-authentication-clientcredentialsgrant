@@ -19,6 +19,7 @@ jobs:
           source-url: ${{ secrets.NUGET_GSOFTDEV_FEED_URL }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GSOFT_NUGET_API_KEY }}
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
